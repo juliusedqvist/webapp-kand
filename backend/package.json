@@ -1,0 +1,15 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Web project for kand",
+  "license": "ISC",
+  "author": "JE, FM, AR, EÖ",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests available\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
