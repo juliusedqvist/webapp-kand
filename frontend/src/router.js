@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '@/views/Home.vue';
-import RobotControl from '@/views/RobotControl.vue';
-import Documentation from '@/views/Documentation.vue';
+import Control from '@/views/Control.vue';
+import Docs from '@/views/Docs.vue';
 import NotFound from '@/views/NotFound.vue';
 
 const routes = [
   { path: '/', component: Home },
-  { path: '/robot', component: RobotControl },
-  { path: '/docs', component: Documentation },
+  { path: '/control', component: Control},
+  { path: '/docs', component: Docs },
   { path: '/:pathMatch(.*)*', component: NotFound }  // 404-sida
 ];
 
