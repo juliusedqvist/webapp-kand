@@ -226,7 +226,7 @@ function confirmClearLog() {
   font-weight: bold;
   border: 0.05em solid #004073;
 
-  padding: 0.1em 0.3em;
+  padding: 0.1em 0.8em;
   font-size: 1.1em;
   flex-shrink: 0;
 }
