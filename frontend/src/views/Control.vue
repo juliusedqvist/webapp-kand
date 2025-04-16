@@ -61,12 +61,23 @@
       
       </div>
     </div>
-    <div class="log"
-      style="top: 0%; left: 2.3%;">
+    <div class="log" style="top: 0%; left: 2.25%;">
+      <div class="log-header">
+  <span>Log</span>
+  <button class="clear-log-btn" @click="confirmClearLog">Clear</button></div>
+  <div class="log-box">
+    <div
+      v-for="(entry, index) in logs"
+      :key="index"
+      class="log-entry"
+      :class="entry.type"
+    >
+      {{ entry.message }}
+    </div>
+  </div>
+</div>
 
-      This is where the log will be
-      
-      </div>
+
   </div>
   
 </template>
@@ -75,9 +86,31 @@
 
 
 <script setup>
+import { ref } from 'vue'
+
+const logs = ref([])
+
 function trigger(button) {
-  console.log(`${button} clicked`)
+  const time = new Date().toLocaleTimeString()
+  const type = getRandomType() // Replace or set to 'info' based on real logic
+  const message = `[${time}] ${button} clicked`
+
+  logs.value.unshift({ message, type })
+
+  console.log(`[${type.toUpperCase()}] ${message}`)
 }
+
+function getRandomType() {
+  const types = ['info', 'warning', 'error']
+  return types[Math.floor(Math.random() * types.length)]
+}
+
+function confirmClearLog() {
+  if (confirm("Are you sure you want to clear the log?")) {
+    logs.value = []
+  }
+}
+
 </script>
 
 <style scoped>
@@ -90,7 +123,7 @@ function trigger(button) {
   justify-content: flex-start; /* Align to the top */
   margin: 0;
   padding: 0;
-  background-color: yellow;
+  /*background-color: yellow;*/
 }
 
 .row-ui {
@@ -102,7 +135,7 @@ function trigger(button) {
   justify-content: flex-start; /* Align to the top */
   margin: 0;
   padding: 0;
-  background-color: rgb(55, 0, 255);
+  /*background-color: rgb(55, 0, 255);*/
 }
 
 .robot-svg {
@@ -172,14 +205,103 @@ function trigger(button) {
   font-size: 1vw;
 
 }
-.log{
+.log {
   position: relative;
-  background-color: #730049;
-  width: 40.2em;
-  height: 6em;
+  background-color: #f7f7f7;
+  width: 60em;
+  height: 11em;
   font-size: 1vw;
-  padding: 0.2em 0.5em;
-
+  padding: 0;
+  border-radius: 0.5em;
+  overflow: hidden;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: monospace;
+  display: flex;
+  flex-direction: column;
 }
+
+.log-header {
+  color: white;
+  background-color: #004073;
+  font-weight: bold;
+  border: 0.05em solid #004073;
+
+  padding: 0.1em 0.3em;
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.log-box {
+  flex-grow: 1;
+  overflow-y: scroll;
+  padding: 0.5em;
+}
+
+/* Prevent horizontal scroll */
+.log-box::-webkit-scrollbar:horizontal {
+  display: none;
+}
+
+
+.log-entry {
+  font-weight: 500;
+  margin-bottom: 0.3em;
+  /*white-space: nowrap; /* Prevents wrapping, optional */
+}
+
+.log-entry.info {
+  color: #004073;
+}
+
+.log-entry.warning {
+  color: #b8860b;
+}
+
+.log-entry.error {
+  color: #b00020;
+}
+
+/* ✅ Firefox support */
+
+
+/* ✅ WebKit-based browsers (Chrome, Edge, Safari) */
+.log::-webkit-scrollbar {
+  width: 10px;
+}
+
+.log::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 10px;
+}
+
+.log::-webkit-scrollbar-thumb {
+  background: #004073;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+}
+
+.log::-webkit-scrollbar-thumb:hover {
+  background: #3ba7ff;
+}
+
+.clear-log-btn {
+  background-color: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 0.15em 0.5em;
+  margin-left: 1em;
+  font-size: 0.9em;
+  cursor: pointer;
+  border-radius: 0.3em;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.clear-log-btn:hover {
+  background-color: white;
+  color: #004073;
+}
+
+
+
 
 </style>
