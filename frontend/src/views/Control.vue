@@ -63,12 +63,13 @@
       <div class="next-action-panel">
       <div class="panel-header">Next action</div>
       <div class="action-display">{{ nextAction || '—' }}</div>
-
+      <div class="btn-display">
       <button class="panel-btn" @click="clearNextAction">CLEAR</button>
       <button class="panel-btn" @click="setNextActionFrom('A')">PICK FROM A</button>
       <button class="panel-btn" @click="setNextActionTo('A')">PLACE IN A</button>
       <button class="panel-btn" @click="setNextActionFrom('B')">PICK FROM B</button>
       <button class="panel-btn" @click="setNextActionTo('B')">PLACE IN B</button>
+      </div>
       </div>
     </div>
     <div class="log" style="top: 0%; left: 2.25%;">
@@ -345,32 +346,54 @@ watch(
 
 .next-action-panel {
   position: relative;
-  width: 10em;
-  background-color: #fbfbfb;
-  border: 4px solid #004073;
+  top:65%;
+  width: 12vw;
+  height: auto;
+  background-color: #004073;
+  border: 0.1em solid #004073;
   color: #fbfbfb;
   padding: 0.2em;
   border-radius: 0.5em;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: sans-serif;
+  font-family: Helvetica;
   gap: 0.4em;
 }
 
 .panel-header {
-  font-size: 1.2em;
-  font-weight: bold;
+  font-size: 1.6vw;
+  width: 100%;
+  font-family: Helvetica;
+  text-align: center;
+  background-color: #004073;
 }
 
 .action-display {
   background-color: #fbfbfb;
   color: black;
   width: 100%;
-  padding: 0.5em;
+  margin-top: 0em;
+  padding: 0.25em;
   font-size: 1.2em;
   text-align: center;
+  border: 0.em solid #004073;
   border-radius: 0.3em;
+}
+
+.btn-display {
+  background-color: #fbfbfb;
+  color: black;
+  width: 100%;
+  margin-top: 0em;
+  padding: 0.3em;
+  text-align: center;
+  border: 0em solid #fbfbfb;
+  border-radius: 0.3em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
 }
 
 .panel-btn {
@@ -378,6 +401,7 @@ watch(
   background-color: white;
   color: black;
   border: 2px solid black;
+  font-size: 1.1vw;
   font-weight: bold;
   padding: 0.5em;
   border-radius: 0.3em;
