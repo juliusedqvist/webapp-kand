@@ -57,15 +57,25 @@
       <div class="commands"
       style="top: 80%; left: 60%;">
 
-      This is where the commands will be
       
+      
+      </div>
+      <div class="next-action-panel">
+      <div class="panel-header">Next action</div>
+      <div class="action-display">{{ nextAction || '—' }}</div>
+
+      <button class="panel-btn" @click="clearNextAction">CLEAR</button>
+      <button class="panel-btn" @click="setNextActionFrom('A')">PICK FROM A</button>
+      <button class="panel-btn" @click="setNextActionTo('A')">PLACE IN A</button>
+      <button class="panel-btn" @click="setNextActionFrom('B')">PICK FROM B</button>
+      <button class="panel-btn" @click="setNextActionTo('B')">PLACE IN B</button>
       </div>
     </div>
     <div class="log" style="top: 0%; left: 2.25%;">
       <div class="log-header">
   <span>Log</span>
   <button class="clear-log-btn" @click="confirmClearLog">Clear</button></div>
-  <div class="log-box">
+  <div class="log-box" ref="logBox">
     <div
       v-for="(entry, index) in logs"
       :key="index"
@@ -86,17 +96,37 @@
 
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 
 const logs = ref([])
+const logBox = ref(null)
+
+const nextAction = ref(null)
+function setNextActionFrom(source) {
+  if (triggeredCommands.value.length > 0) {
+    const last = triggeredCommands.value.at(-1)
+    nextAction.value = `${last} ⇒ ${source}`
+  }
+}
+
+function setNextActionTo(target) {
+  if (triggeredCommands.value.length > 0) {
+    const last = triggeredCommands.value.at(-1)
+    nextAction.value = `${last} ⇒ ${target}`
+  }
+}
+
+function clearNextAction() {
+  nextAction.value = null
+}
 
 function trigger(button) {
-  const time = new Date().toLocaleTimeString()
+  const now = new Date()
+  const time = `${now.toLocaleDateString("sv-SE")} ${now.toLocaleTimeString("sv-SE")}`
   const type = getRandomType() // Replace or set to 'info' based on real logic
   const message = `[${time}] ${button} clicked`
 
-  logs.value.unshift({ message, type })
-
+  logs.value.push({ message, type })
   console.log(`[${type.toUpperCase()}] ${message}`)
 }
 
@@ -111,7 +141,19 @@ function confirmClearLog() {
   }
 }
 
+// Scroll to bottom on log change
+watch(
+  logs,
+  async () => {
+    await nextTick()
+    if (logBox.value) {
+      logBox.value.scrollTop = logBox.value.scrollHeight
+    }
+  },
+  { deep: true }
+)
 </script>
+
 
 <style scoped>
 .column-ui {
@@ -261,10 +303,10 @@ function confirmClearLog() {
   color: #b00020;
 }
 
-/* ✅ Firefox support */
+/* Firefox support */
 
 
-/* ✅ WebKit-based browsers (Chrome, Edge, Safari) */
+/* WebKit-based browsers (Chrome, Edge, Safari) */
 .log::-webkit-scrollbar {
   width: 10px;
 }
@@ -300,6 +342,53 @@ function confirmClearLog() {
   background-color: white;
   color: #004073;
 }
+
+.next-action-panel {
+  position: relative;
+  width: 10em;
+  background-color: #fbfbfb;
+  border: 4px solid #004073;
+  color: #fbfbfb;
+  padding: 0.2em;
+  border-radius: 0.5em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: sans-serif;
+  gap: 0.4em;
+}
+
+.panel-header {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.action-display {
+  background-color: #fbfbfb;
+  color: black;
+  width: 100%;
+  padding: 0.5em;
+  font-size: 1.2em;
+  text-align: center;
+  border-radius: 0.3em;
+}
+
+.panel-btn {
+  width: 100%;
+  background-color: white;
+  color: black;
+  border: 2px solid black;
+  font-weight: bold;
+  padding: 0.5em;
+  border-radius: 0.3em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.panel-btn:hover {
+  background-color: #ddeeff;
+}
+
 
 
 
