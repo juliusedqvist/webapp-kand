@@ -1,27 +1,24 @@
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 
-// Initialize the serial port with correct path and baud rate
-const port = new SerialPort({ path: '/dev/ttyUSB0', baudRate: 9600 });
+let port;
+let parser;
+let isConnected = false;
 
-// Set up parser to read lines ending with newline character
-const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
+port = new SerialPort({ path: '/dev/ttyUSB0', baudRate: 9600 });
 
-// Event listener for incoming data from Arduino
-parser.on('data', data => {
-  console.log('Received from Arduino:', data.trim());
+port.on('open', () => {
+    isConnected = true;
+    parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
+
+    parser.on('data', data => {
+        console.log('Received from Arduino:', data.trim());
+    });
+
+    console.log('Connected to Arduino');
 });
 
-// Function to send commands to the Arduino
-function sendToArduino(command) {
-  port.write(command + '\n', err => {
-    if (err) {
-      console.error('Error on write:', err.message);
-    } else {
-      console.log('Command sent:', command);
-    }
-  });
-}
-
-module.exports = { sendToArduino };
+port.on('error', (err) => {
+    console.error('Error connecting to Arduino:', err.message);
+});
 
