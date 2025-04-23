@@ -119,10 +119,8 @@ async function runNextAction() {
         command: nextAction.value
       });
 
-      log(`Response: ${JSON.stringify(res.data)}`, 'success');
     } catch (err) {
       const msg = err.response?.data?.error || err.message || 'Unknown error';
-      log(`Error: ${msg}`, 'error');
     }
 
     clearNextAction()
