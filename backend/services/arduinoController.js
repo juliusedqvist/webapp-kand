@@ -19,7 +19,7 @@ function sendToArduino(command) {
         console.log('Connected to Arduino');
     });
     console.log(command);
-    port.write(command + '\n', (err) => {
+    port.write("TOGGLE" + '\n', (err) => {
         if (err) {
             return console.error('Error writing to Arduino:', err.message);
         }
