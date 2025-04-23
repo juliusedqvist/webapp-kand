@@ -4,109 +4,87 @@
       <div class="svg-wrapper">
         <img src="@/assets/Chambers.svg" class="robot-svg" />
 
-        <!-- Chamber buttons -->
+        <!-- Chamber buttons A -->
         <button
           v-for="i in 24"
-          :key="i"
+          :key="'A' + i"
           class="chamber-btn"
           :style="{
-            top: i <= 12 ? '44.9%' : '50.7%', // First row top, second row lower
-            left: `${6.3 + ((i - 1) % 12) * (66 / 11)}%`, // 12 buttons across a ~50% span
+            top: i <= 12 ? '44.9%' : '50.7%',
+            left: `${6.3 + ((i - 1) % 12) * (66 / 11)}%`,
             transform: 'translate(-50%, -50%)'
           }"
-          @click="trigger(`A${i}`)"
+          @click="handleChamberClick(`A${i}`)"
         >
           A{{ i }}
         </button>
+
+        <!-- Chamber buttons B -->
         <button
           v-for="i in 24"
-          :key="i"
+          :key="'B' + i"
           class="chamber-btn"
           :style="{
-            top: i <= 12 ? '23.1%' : '29%', // First row top, second row lower
-            left: `${30 + ((i - 1) % 12) * (66 / 11)}%`, // 12 buttons across a ~50% span
+            top: i <= 12 ? '23.1%' : '29%',
+            left: `${30 + ((i - 1) % 12) * (66 / 11)}%`,
             transform: 'translate(-50%, -50%)'
           }"
-          @click="trigger(`B${i}`)"
+          @click="handleChamberClick(`B${i}`)"
         >
           B{{ i }}
         </button>
-        
-        <button
-          class="chamber-btn"
-          style="top: 23.1%; left: 4.5%; transform: translate(-50%, -50%);"
-          @click="trigger('C1')"
-        >
-          C1
-        </button>
-        <button
-          class="chamber-btn"
-          style="top: 29%; left: 4.5%; transform: translate(-50%, -50%);"
-          @click="trigger('C2')"
-        >
-          C2
-        </button>
-        <button
-          class="chamber-btn"
-          style="top: 5.2%; left: 10.8%; transform: translate(-50%, -50%);"
-          @click="trigger('P')"
-        >
-          P
-        </button>
-      </div>
-      <div class="commands"
-      style="top: 80%; left: 60%;">
 
-      
-      
+        <!-- Additional chamber-like buttons -->
+        <button class="chamber-btn" style="top: 23.1%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C1')">C1</button>
+        <button class="chamber-btn" style="top: 29%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C2')">C2</button>
+        <button class="chamber-btn" style="top: 5.2%; left: 10.8%; transform: translate(-50%, -50%);" @click="handleChamberClick('P')">P</button>
       </div>
+
+      <!-- Panels -->
       <div class="panel-stack">
-      <div class="next-action-panel">
-      <div class="panel-header">Commands</div>
-      <div class="btn-display">
-      <button class="panel-btn" style="background-color: #ff0000; color: white; height: 3.2vw;" @click="clearNextAction">STOP</button>
-      <button class="panel-btn" style="background-color: #f9cb00; color: white; height: 3.2vw;" @click="setNextActionFrom('A')">RESET</button>
-      <button class="panel-btn" style="background-color: #4cd000; color: white; height: 3.2vw;" @click="setNextActionTo('A')">RESUME</button>
-      <button class="panel-btn" style="background-color: #004073; color: white; height: 3.2vw;" @click="setNextActionFrom('B')">RUN NEXT</button>
-      </div>
-      </div>
+        <div class="next-action-panel">
+          <div class="panel-header">Commands</div>
+          <div class="btn-display">
+            <button class="panel-btn" style="background-color: #ff0000;" @click="logCommand('STOP')">STOP</button>
+            <button class="panel-btn" style="background-color: #f9cb00;" @click="logCommand('RESET')">RESET</button>
+            <button class="panel-btn" style="background-color: #4cd000;" @click="logCommand('RESUME')">RESUME</button>
+            <button class="panel-btn" style="background-color: #004073;" @click="runNextAction">RUN NEXT</button>
+          </div>
+        </div>
 
-      <div class="next-action-panel">
-      <div class="panel-header">Next action</div>
-      <div class="action-display">{{ nextAction || '—' }}</div>
-      <div class="btn-display">
-      <button class="panel-btn" @click="clearNextAction">CLEAR</button>
-      <button class="panel-btn" @click="setNextActionFrom('A')">PICK FROM A</button>
-      <button class="panel-btn" @click="setNextActionTo('A')">PLACE IN A</button>
-      <button class="panel-btn" @click="setNextActionFrom('B')">PICK FROM B</button>
-      <button class="panel-btn" @click="setNextActionTo('B')">PLACE IN B</button>
-      </div>
-      </div>
+        <div class="next-action-panel">
+          <div class="panel-header">Next action</div>
+          <div class="action-display">{{ nextAction || '—' }}</div>
+          <div class="btn-display">
+            <button class="panel-btn" @click="clearNextAction">CLEAR</button>
+            <button class="panel-btn" @click="handleChamberClick('Pick from A')">PICK FROM A</button>
+            <button class="panel-btn" @click="handleChamberClick('Place in A')">PLACE IN A</button>
+            <button class="panel-btn" @click="handleChamberClick('Pick from B')">PICK FROM B</button>
+            <button class="panel-btn" @click="handleChamberClick('Place in B')">PLACE IN B</button>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Log Section -->
     <div class="log" style="top: 0%; left: 2.25%;">
       <div class="log-header">
-  <span>Log</span>
-  <button class="clear-log-btn" @click="confirmClearLog">Clear</button></div>
-  <div class="log-box" ref="logBox">
-    <div
-      v-for="(entry, index) in logs"
-      :key="index"
-      class="log-entry"
-      :class="entry.type"
-    >
-      {{ entry.message }}
+        <span>Log</span>
+        <button class="clear-log-btn" @click="confirmClearLog">Clear</button>
+      </div>
+      <div class="log-box" ref="logBox">
+        <div
+          v-for="(entry, index) in logs"
+          :key="index"
+          class="log-entry"
+          :class="entry.type"
+        >
+          {{ entry.message }}
+        </div>
+      </div>
     </div>
   </div>
-</div>
-
-
-  </div>
-  
 </template>
-
-
-
 
 <script setup>
 import { ref, watch, nextTick } from 'vue'
@@ -115,37 +93,40 @@ const logs = ref([])
 const logBox = ref(null)
 
 const nextAction = ref(null)
-function setNextActionFrom(source) {
-  if (triggeredCommands.value.length > 0) {
-    const last = triggeredCommands.value.at(-1)
-    nextAction.value = `${last} ⇒ ${source}`
-  }
-}
+const selectedChambers = ref([])
 
-function setNextActionTo(target) {
-  if (triggeredCommands.value.length > 0) {
-    const last = triggeredCommands.value.at(-1)
-    nextAction.value = `${last} ⇒ ${target}`
+function handleChamberClick(label) {
+  if (selectedChambers.value.length === 0) {
+    selectedChambers.value.push(label)
+    nextAction.value = `${label} ⇒`
+  } else if (selectedChambers.value.length === 1) {
+    selectedChambers.value.push(label)
+    nextAction.value = `${selectedChambers.value[0]} ⇒ ${selectedChambers.value[1]}`
   }
+  // No log generation here
 }
 
 function clearNextAction() {
   nextAction.value = null
+  selectedChambers.value = []
 }
 
-function trigger(button) {
+function runNextAction() {
+  if (nextAction.value) {
+    log(`Running: ${nextAction.value}`, 'info')
+    clearNextAction()
+  }
+}
+
+function logCommand(command) {
+  log(command, 'info')
+}
+
+function log(message, type = 'info') {
   const now = new Date()
   const time = `${now.toLocaleDateString("sv-SE")} ${now.toLocaleTimeString("sv-SE")}`
-  const type = getRandomType() // Replace or set to 'info' based on real logic
-  const message = `[${time}] ${button} clicked`
-
-  logs.value.push({ message, type })
+  logs.value.push({ message: `[${time}] ${message}`, type })
   console.log(`[${type.toUpperCase()}] ${message}`)
-}
-
-function getRandomType() {
-  const types = ['info', 'warning', 'error']
-  return types[Math.floor(Math.random() * types.length)]
 }
 
 function confirmClearLog() {
@@ -154,7 +135,6 @@ function confirmClearLog() {
   }
 }
 
-// Scroll to bottom on log change
 watch(
   logs,
   async () => {
@@ -166,6 +146,7 @@ watch(
   { deep: true }
 )
 </script>
+
 
 
 <style scoped>
@@ -263,7 +244,7 @@ watch(
 .next-action-panel {
   position: relative;
   /*top:65%;*/
-  width: 12vw;
+  width: 15vw;
   height: auto;
   background-color: #004073;
   border: 0.1em solid #004073;
@@ -279,12 +260,12 @@ watch(
 
 .panel-stack {
   display: flex;
-  padding-top: 1vw;
+  padding-top: 2vw;
   flex-direction: column;
-  gap: 0.5vw; /* Optional spacing between the two panels */
+  gap: 2vw; /* Optional spacing between the two panels */
   position: relative;
   top: 0%;
-  left: 1vw; /* Adjust as needed */
+  left: 2vw; /* Adjust as needed */
 }
 
 
@@ -328,7 +309,7 @@ watch(
 
 .panel-btn {
   width: 100%;
-  height: 2.6vw;
+  height: 3.2vw;
   font-weight: bold;
   background-color: #fbfbfb;
   color: black;
@@ -447,9 +428,5 @@ watch(
   background-color: white;
   color: #004073;
 }
-
-
-
-
 
 </style>
