@@ -18,5 +18,16 @@ router.post('/led/:state', (req, res) => {
   res.json({ status: 'success', command: state });
 });
 
+router.post('/command', (req, res) => {
+  const { command } = req.body;
+
+  if (!command || typeof command !== 'string') {
+    return res.status(400).json({ error: 'Command must be a non-empty string' });
+  }
+
+  sendToArduino(command);
+  res.json({ status: 'success', sent: command });
+});
+
 module.exports = router;
 

@@ -86,6 +86,7 @@
 
 <script setup>
 import { ref, watch, nextTick } from 'vue'
+import axios from 'axios';
 
 const logs = ref([])
 const logBox = ref(null)
@@ -109,10 +110,21 @@ function clearNextAction() {
   selectedChambers.value = []
 }
 
-function runNextAction() {
+async function runNextAction() {
   if (nextAction.value) {
-    log(`Running: ${nextAction.value}`, 'info')
-    console.log("är rätt")
+    log(`Running: ${nextAction.value}`, 'info');
+
+    try {
+      const res = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: nextAction.value
+      });
+
+      log(`Response: ${JSON.stringify(res.data)}`, 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Unknown error';
+      log(`Error: ${msg}`, 'error');
+    }
+
     clearNextAction()
   }
 }
