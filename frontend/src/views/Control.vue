@@ -114,6 +114,7 @@ function clearNextAction() {
 function runNextAction() {
   if (nextAction.value) {
     log(`Running: ${nextAction.value}`, 'info')
+    console.log("är rätt")
     clearNextAction()
   }
 }
