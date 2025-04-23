@@ -45,10 +45,10 @@
         <div class="next-action-panel">
           <div class="panel-header">Commands</div>
           <div class="btn-display">
-            <button class="panel-btn" style="background-color: #ff0000;" @click="logCommand('STOP')">STOP</button>
-            <button class="panel-btn" style="background-color: #f9cb00;" @click="logCommand('RESET')">RESET</button>
-            <button class="panel-btn" style="background-color: #4cd000;" @click="logCommand('RESUME')">RESUME</button>
-            <button class="panel-btn" style="background-color: #004073;" @click="runNextAction">RUN NEXT</button>
+            <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP')">STOP</button>
+            <button class="panel-btn" style="background-color: #f9cb00; color: white; height: 3vw;" @click="logCommand('RESET')">RESET</button>
+            <button class="panel-btn" style="background-color: #4cd000; color: white; height: 3vw;" @click="logCommand('RESUME')">RESUME</button>
+            <button class="panel-btn" style="background-color: #004073; color: white; height: 3vw;" @click="runNextAction">RUN NEXT</button>
           </div>
         </div>
 
@@ -57,10 +57,8 @@
           <div class="action-display">{{ nextAction || '—' }}</div>
           <div class="btn-display">
             <button class="panel-btn" @click="clearNextAction">CLEAR</button>
-            <button class="panel-btn" @click="handleChamberClick('Pick from A')">PICK FROM A</button>
-            <button class="panel-btn" @click="handleChamberClick('Place in A')">PLACE IN A</button>
-            <button class="panel-btn" @click="handleChamberClick('Pick from B')">PICK FROM B</button>
-            <button class="panel-btn" @click="handleChamberClick('Place in B')">PLACE IN B</button>
+            <button class="panel-btn" @click="handleChamberClick('AUTO A')">AUTO A</button>
+            <button class="panel-btn" @click="handleChamberClick('AUTO B')">AUTO B</button>
           </div>
         </div>
       </div>
@@ -314,11 +312,10 @@ watch(
   font-weight: bold;
   background-color: #fbfbfb;
   color: black;
-  border: 2px solid black;
   font-size: 1.1vw;
   color: rgb(0, 0, 0);
-  border: 0.15em solid black;
-  border-radius: 0.4em;
+  border: 0.2vw solid black;
+  border-radius: 0.6vw;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
   display: flex;
