@@ -60,6 +60,17 @@
       
       
       </div>
+      <div class="panel-stack">
+      <div class="next-action-panel">
+      <div class="panel-header">Commands</div>
+      <div class="btn-display">
+      <button class="panel-btn" style="background-color: #ff0000; color: white; height: 3.2vw;" @click="clearNextAction">STOP</button>
+      <button class="panel-btn" style="background-color: #f9cb00; color: white; height: 3.2vw;" @click="setNextActionFrom('A')">RESET</button>
+      <button class="panel-btn" style="background-color: #4cd000; color: white; height: 3.2vw;" @click="setNextActionTo('A')">RESUME</button>
+      <button class="panel-btn" style="background-color: #004073; color: white; height: 3.2vw;" @click="setNextActionFrom('B')">RUN NEXT</button>
+      </div>
+      </div>
+
       <div class="next-action-panel">
       <div class="panel-header">Next action</div>
       <div class="action-display">{{ nextAction || '—' }}</div>
@@ -69,6 +80,7 @@
       <button class="panel-btn" @click="setNextActionTo('A')">PLACE IN A</button>
       <button class="panel-btn" @click="setNextActionFrom('B')">PICK FROM B</button>
       <button class="panel-btn" @click="setNextActionTo('B')">PLACE IN B</button>
+      </div>
       </div>
       </div>
     </div>
@@ -162,7 +174,7 @@ watch(
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Align to the left */
+  align-items:flex-start; /* Align to the left */
   justify-content: flex-start; /* Align to the top */
   margin: 0;
   padding: 0;
@@ -235,8 +247,7 @@ watch(
 
 .chamber-btn:hover {
   background-color: #004073;
-  transform: translate(-50%, -50%) scale(1.15);
-  /*box-shadow: 0px 4px 8px #3ba7ff; /* Blue glow */
+  /*box-shadow: 0px 0px 8px #3ba7ff; /* Blue glow */
   color: rgb(255, 255, 255);
 }
 
@@ -248,6 +259,99 @@ watch(
   font-size: 1vw;
 
 }
+
+.next-action-panel {
+  position: relative;
+  /*top:65%;*/
+  width: 12vw;
+  height: auto;
+  background-color: #004073;
+  border: 0.1em solid #004073;
+  color: #fbfbfb;
+  padding: 0.2em;
+  border-radius: 0.5em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Helvetica;
+  gap: 0.4em;
+}
+
+.panel-stack {
+  display: flex;
+  padding-top: 1vw;
+  flex-direction: column;
+  gap: 0.5vw; /* Optional spacing between the two panels */
+  position: relative;
+  top: 0%;
+  left: 1vw; /* Adjust as needed */
+}
+
+
+.panel-header {
+  font-size: 1.6vw;
+  margin-bottom: -0.4em;
+  margin-top: -0.3em;
+  width: 100%;
+  height: 10%;
+  font-family: Helvetica;
+  text-align: center;
+  
+}
+
+.action-display {
+  background-color: #fbfbfb;
+  color: black;
+  width: 100%;
+  margin-top: 0em;
+  padding: 0.4vw;
+  font-size: 1.5vw;
+  text-align: center;
+  border: 0.em solid #004073;
+  border-radius: 0.3em;
+}
+
+.btn-display {
+  background-color: #fbfbfb;
+  color: black;
+  width: 100%;
+  margin-top: 0em;
+  padding: 0.5vw;
+  text-align: center;
+  border: 0em solid #fbfbfb;
+  border-radius: 0.3em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5vw;
+}
+
+.panel-btn {
+  width: 100%;
+  height: 2.6vw;
+  font-weight: bold;
+  background-color: #fbfbfb;
+  color: black;
+  border: 2px solid black;
+  font-size: 1.1vw;
+  color: rgb(0, 0, 0);
+  border: 0.15em solid black;
+  border-radius: 0.4em;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.panel-btn:hover{
+  background-color: #004073;
+  transform: scale(1.05) /*translate(-80%, -20%)*/;
+  /*box-shadow: 0px 4px 8px #3ba7ff; /* Blue glow */
+  color: rgb(255, 255, 255);
+}
+
 .log {
   position: relative;
   background-color: #f7f7f7;
@@ -342,75 +446,6 @@ watch(
 .clear-log-btn:hover {
   background-color: white;
   color: #004073;
-}
-
-.next-action-panel {
-  position: relative;
-  top:65%;
-  width: 12vw;
-  height: auto;
-  background-color: #004073;
-  border: 0.1em solid #004073;
-  color: #fbfbfb;
-  padding: 0.2em;
-  border-radius: 0.5em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: Helvetica;
-  gap: 0.4em;
-}
-
-.panel-header {
-  font-size: 1.6vw;
-  width: 100%;
-  font-family: Helvetica;
-  text-align: center;
-  background-color: #004073;
-}
-
-.action-display {
-  background-color: #fbfbfb;
-  color: black;
-  width: 100%;
-  margin-top: 0em;
-  padding: 0.25em;
-  font-size: 1.2em;
-  text-align: center;
-  border: 0.em solid #004073;
-  border-radius: 0.3em;
-}
-
-.btn-display {
-  background-color: #fbfbfb;
-  color: black;
-  width: 100%;
-  margin-top: 0em;
-  padding: 0.3em;
-  text-align: center;
-  border: 0em solid #fbfbfb;
-  border-radius: 0.3em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3em;
-}
-
-.panel-btn {
-  width: 100%;
-  background-color: white;
-  color: black;
-  border: 2px solid black;
-  font-size: 1.1vw;
-  font-weight: bold;
-  padding: 0.5em;
-  border-radius: 0.3em;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.panel-btn:hover {
-  background-color: #ddeeff;
 }
 
 
