@@ -1,11 +1,39 @@
+const int ledPin = LED_BUILTIN;
+bool ledState = false;
+String incomingCommand = "";
+
 void setup() {
-  pinMode(13, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, ledState);
+
+  Serial.begin(9600);
+  while (!Serial); // Wait for serial port to connect (for some boards)
+
+  Serial.println("Arduino is ready. Send 'TOGGLE' to toggle LED.");
 }
 
 void loop() {
-  digitalWrite(13, HIGH);
-  delay(1000);
-  digitalWrite(13, LOW);
-  delay(1000);
+  // Check if data is available
+  while (Serial.available() > 0) {
+    char received = Serial.read();
+
+    // If newline, process command
+    if (received == '\n') {
+      incomingCommand.trim(); // Remove any extra whitespace/newlines
+
+      if (incomingCommand.equalsIgnoreCase("TOGGLE")) {
+        ledState = !ledState;
+        digitalWrite(ledPin, ledState);
+        Serial.print("LED is now ");
+        Serial.println(ledState ? "ON" : "OFF");
+      } else {
+        Serial.println("Unknown command.");
+      }
+
+      incomingCommand = ""; // Reset buffer
+    } else {
+      incomingCommand += received;
+    }
+  }
 }
 
