@@ -1,9 +1,9 @@
 <template>
   <div>
-    <button @click="sendHelloWorld('1')">Toggle LED 1</button>
+    <button @click="sendHelloWorld('0')">Toggle LED 1</button>
   </div>
   <div>
-    <button @click="sendHelloWorld('2')">Toggle LED 2</button>
+    <button @click="sendHelloWorld('1')">Toggle LED 2</button>
   </div>
 </template>
 
