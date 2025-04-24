@@ -10,7 +10,7 @@
           :key="'A' + i"
           class="chamber-btn"
           :style="{
-            top: i <= 12 ? '44.9%' : '50.7%',
+            top: i <= 12 ? '82.6%' : '93.3%',
             left: `${6.3 + ((i - 1) % 12) * (66 / 11)}%`,
             transform: 'translate(-50%, -50%)'
           }"
@@ -25,7 +25,7 @@
           :key="'B' + i"
           class="chamber-btn"
           :style="{
-            top: i <= 12 ? '23.1%' : '29%',
+            top: i <= 12 ? '42.5%' : '53.4%',
             left: `${30 + ((i - 1) % 12) * (66 / 11)}%`,
             transform: 'translate(-50%, -50%)'
           }"
@@ -35,9 +35,9 @@
         </button>
 
         <!-- Additional chamber-like buttons -->
-        <button class="chamber-btn" style="top: 23.1%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C1')">C1</button>
-        <button class="chamber-btn" style="top: 29%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C2')">C2</button>
-        <button class="chamber-btn" style="top: 5.2%; left: 10.8%; transform: translate(-50%, -50%);" @click="handleChamberClick('P')">P</button>
+        <button class="chamber-btn" style="top: 42.5%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C1')">C1</button>
+        <button class="chamber-btn" style="top: 53.4%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C2')">C2</button>
+        <button class="chamber-btn" style="top: 9.6%; left: 10.8%; transform: translate(-50%, -50%);" @click="handleChamberClick('P')">P</button>
       </div>
 
       <!-- Panels -->
@@ -176,7 +176,7 @@ watch(
   justify-content: flex-start; /* Align to the top */
   margin: 0;
   padding: 0;
-  /*background-color: yellow;*/
+  background-color: yellow;/**/
 }
 
 .row-ui {
@@ -188,7 +188,7 @@ watch(
   justify-content: flex-start; /* Align to the top */
   margin: 0;
   padding: 0;
-  /*background-color: rgb(55, 0, 255);*/
+  background-color: rgb(0, 255, 64);/**/
 }
 
 .robot-svg {
@@ -199,6 +199,8 @@ watch(
   height: auto; /* Maintain aspect ratio */
   object-fit: contain; /* Keeps the SVG inside the container without stretching */
   pointer-events: none;
+  /*max-height: 68vh;
+  max-width: 130vh;*/
   /*background-color: red;  /* Added for debugging */
 }
 
@@ -208,9 +210,11 @@ watch(
   top: 0.5rem;
   left: 0.5rem;
   width: 65%; /* Adjust width as needed */
-  aspect-ratio: 1 / 1; /* Keeps the container a square */
+  /*max-height: 68vh;
+  max-width: 130vh;*/
+  aspect-ratio: 1.84 / 1; /* Keeps the container a square */
   margin-top: 0; /* Ensure no margin at the top */
-  /*background-color: blue; /* Added for debugging */
+  background-color: blue; /* Added for debugging */
 
 }
 /*
