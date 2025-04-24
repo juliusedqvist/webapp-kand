@@ -97,7 +97,7 @@ const selectedChambers = ref([])
 function handleChamberClick(label) {
   if (selectedChambers.value.length === 0) {
     selectedChambers.value.push(label)
-    nextAction.value = `${label} ⇒`
+    nextAction.value = `${label}`
   } else if (selectedChambers.value.length === 1) {
     selectedChambers.value.push(label)
     nextAction.value = `${selectedChambers.value[0]} ⇒ ${selectedChambers.value[1]}`
@@ -127,8 +127,16 @@ async function runNextAction() {
   }
 }
 
-function logCommand(command) {
+async function logCommand(command) {
   log(command, 'info')
+  try {
+      const res = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: nextAction.value
+      });
+
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Unknown error';
+    }
 }
 
 function log(message, type = 'info') {
@@ -344,9 +352,9 @@ watch(
 .log {
   position: relative;
   background-color: #f7f7f7;
-  width: 60em;
-  height: 11em;
-  font-size: 1vw;
+  width: 60vw;
+  height: 11vw;
+  font-size: 1.1vw;
   padding: 0;
   border-radius: 0.5em;
   overflow: hidden;
