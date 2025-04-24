@@ -368,6 +368,7 @@ watch(
   margin-left: 0.15em;
   font-size: 1.1vw;
   margin-top: 0.5em;
+  border: 0.25vw solid #004073;
   border-radius: 0.5em;
   overflow: hidden;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
