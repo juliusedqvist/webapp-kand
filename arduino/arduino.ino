@@ -1,3 +1,9 @@
+#ifndef DEVICE_ID
+#define DEVICE_ID 0 // fallback ID
+#endif
+
+char buffer[64];
+
 const int ledPin = LED_BUILTIN;
 bool ledState = false;
 String incomingCommand = "";
@@ -9,7 +15,8 @@ void setup() {
   Serial.begin(9600);
   while (!Serial); // Wait for serial port to connect (for some boards)
 
-  Serial.println("Arduino is ready. Send 'TOGGLE' to toggle LED.");
+  sprintf(buffer, "Arduino %d is ready.", DEVICE_ID);
+  Serial.println(buffer);
 }
 
 void loop() {
