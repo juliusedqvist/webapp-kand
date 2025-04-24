@@ -1,6 +1,6 @@
 <template>
-  <div class="column-ui">
-    <div class="row-ui">
+  <div class="row-ui">
+    <div class="column-ui">
       <div class="svg-wrapper">
         <img src="@/assets/Chambers.svg" class="robot-svg" />
 
@@ -40,8 +40,27 @@
         <button class="chamber-btn" style="top: 9.6%; left: 10.8%; transform: translate(-50%, -50%);" @click="handleChamberClick('P')">P</button>
       </div>
 
-      <!-- Panels -->
-      <div class="panel-stack">
+        <!-- Log Section -->
+      <div class="log" style="top: 0%; left: 2.25%;">
+        <div class="log-header">
+          <span>Log</span>
+          <button class="clear-log-btn" @click="confirmClearLog">Clear</button>
+        </div>
+        <div class="log-box" ref="logBox">
+          <div
+            v-for="(entry, index) in logs"
+            :key="index"
+            class="log-entry"
+            :class="entry.type"
+          >
+            {{ entry.message }}
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <!-- Panels -->
+    <div class="panel-stack">
         <div class="next-action-panel">
           <div class="panel-header">Commands</div>
           <div class="btn-display">
@@ -62,25 +81,7 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Log Section -->
-    <div class="log" style="top: 0%; left: 2.25%;">
-      <div class="log-header">
-        <span>Log</span>
-        <button class="clear-log-btn" @click="confirmClearLog">Clear</button>
-      </div>
-      <div class="log-box" ref="logBox">
-        <div
-          v-for="(entry, index) in logs"
-          :key="index"
-          class="log-entry"
-          :class="entry.type"
-        >
-          {{ entry.message }}
-        </div>
-      </div>
-    </div>
+    
   </div>
 </template>
 
@@ -168,27 +169,28 @@ watch(
 
 <style scoped>
 .column-ui {
-  width: 100%;
+  width: 70%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items:flex-start; /* Align to the left */
   justify-content: flex-start; /* Align to the top */
   margin: 0;
-  padding: 0;
-  background-color: yellow;/**/
+  padding: 1em;
+  /*background-color: yellow;/**/
+  
 }
 
 .row-ui {
   width: 100%;
-  height: 75%;
+  height: 100%;
   display: flex;
   flex-direction: row;
   align-items: flex-start; /* Align to the left */
   justify-content: flex-start; /* Align to the top */
   margin: 0;
   padding: 0;
-  background-color: rgb(0, 255, 64);/**/
+  /*background-color: rgb(0, 255, 64);/**/
 }
 
 .robot-svg {
@@ -207,14 +209,14 @@ watch(
 
 .svg-wrapper {
   position: relative; /* Make sure this is relative to provide context for absolute positioning */
-  top: 0.5rem;
-  left: 0.5rem;
-  width: 65%; /* Adjust width as needed */
+  /*top: 0.5rem;
+  left: 0.5rem;*/
+  width: 100%; /* Adjust width as needed */
   /*max-height: 68vh;
   max-width: 130vh;*/
   aspect-ratio: 1.84 / 1; /* Keeps the container a square */
   margin-top: 0; /* Ensure no margin at the top */
-  background-color: blue; /* Added for debugging */
+  /*background-color: blue; /* Added for debugging */
 
 }
 /*
@@ -357,9 +359,11 @@ watch(
   position: relative;
   background-color: #f7f7f7;
   width: 60vw;
-  height: 11vw;
+  height: 25vh;
+  max-height: 20vw;
+  margin-left: 0.15em;
   font-size: 1.1vw;
-  padding: 0;
+  margin-top: 0.5em;
   border-radius: 0.5em;
   overflow: hidden;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
