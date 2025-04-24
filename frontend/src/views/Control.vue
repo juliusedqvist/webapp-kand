@@ -368,10 +368,10 @@ watch(
   margin-left: 0.15em;
   font-size: 1.1vw;
   margin-top: 0.5em;
-  border: 0.25vw solid #004073;
+  /*border-bottom: 0.25vw solid #004073;*/
   border-radius: 0.5em;
   overflow: hidden;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.45);
   font-family: monospace;
   display: flex;
   flex-direction: column;
@@ -381,8 +381,6 @@ watch(
   color: white;
   background-color: #004073;
   font-weight: bold;
-  border: 0.05em solid #004073;
-
   padding: 0.1em 0.8em;
   font-size: 1.1em;
   flex-shrink: 0;
@@ -392,6 +390,11 @@ watch(
   flex-grow: 1;
   overflow-y: scroll;
   padding: 0.5em;
+  border-left: 0.25vw solid #004073;
+  border-right: 0.25vw solid #004073;
+  border-bottom: 0.25vw solid #004073;
+  border-bottom-right-radius: 0.5em;
+  border-bottom-left-radius: 0.5em;
 }
 
 /* Prevent horizontal scroll */
@@ -422,23 +425,26 @@ watch(
 
 
 /* WebKit-based browsers (Chrome, Edge, Safari) */
-.log::-webkit-scrollbar {
-  width: 10px;
+.log-box::-webkit-scrollbar {
+  width: 0.8em;
+  
 }
 
-.log::-webkit-scrollbar-track {
-  background: #e0e0e0;
-  border-radius: 10px;
+.log-box::-webkit-scrollbar-track {
+  background: #dedede;
+  border-bottom-right-radius: 0.25em;
+  border-color: #004073;
+  
 }
 
-.log::-webkit-scrollbar-thumb {
+.log-box::-webkit-scrollbar-thumb {
   background: #004073;
   border-radius: 10px;
   border: 2px solid #e0e0e0;
 }
 
-.log::-webkit-scrollbar-thumb:hover {
-  background: #3ba7ff;
+.log-box::-webkit-scrollbar-thumb:hover {
+  background: #0389f7;
 }
 
 .clear-log-btn {
