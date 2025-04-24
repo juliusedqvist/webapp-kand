@@ -1,73 +1,60 @@
-const { SerialPort } = require('serialport');
+const SerialPort = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 
-let port1;
-let port2;
-let parser;
-let isConnected = false;
+let ports = {};
+let idToPort = {};
 
-// Create and open the serial port ONCE
-port1 = new SerialPort({ path: '/dev/ttyUSB0', baudRate: 9600 });
-port2 = new SerialPort({ path: '/dev/ttyUSB1', baudRate: 9600 });
+const candidates = ['/dev/ttyUSB0', '/dev/ttyUSB1']; // or use serial/by-id for stability
 
-port1.on('open', () => {
-    isConnected = true;
-    console.log('Connected to Arduino');
+for (const path of candidates) {
+  const port = new SerialPort({ path, baudRate: 9600 });
 
-    parser = port1.pipe(new ReadlineParser({ delimiter: '\n' }));
+  port.on('open', () => {
+    console.log(`Port opened: ${path}`);
+    const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
     parser.on('data', data => {
-        console.log('Received from Arduino on USB0:', data.trim());
+      const trimmed = data.trim();
+      console.log(`Data from ${path}: ${trimmed}`);
+
+      // If it reports ID like "ID:1"
+      if (trimmed.startsWith('ID:')) {
+        const id = trimmed.split(':')[1];
+
+        // Store mapping
+        idToPort[id] = port;
+        ports[path] = port;
+
+        console.log(`Mapped Arduino ID ${id} to ${path}`);
+      }
     });
-});
-port2.on('open', () => {
-    isConnected = true;
-    console.log('Connected to Arduino');
+  });
 
-    parser = port2.pipe(new ReadlineParser({ delimiter: '\n' }));
+  port.on('error', (err) => {
+    console.error(`Error on ${path}:`, err.message);
+  });
+}
 
-    parser.on('data', data => {
-        console.log('Received from Arduino on USB1:', data.trim());
-    });
-});
-
-port1.on('error', (err) => {
-    console.error('Error connecting to Arduino:', err.message);
-});
-port2.on('error', (err) => {
-    console.error('Error connecting to Arduino:', err.message);
-});
 
 // Exported function: just writes to the existing port
+
 function sendToArduino(command) {
+  const port = idToPort[command];
 
-    if (command === '1') {
-        if (!isConnected || !port1.writable) {
-            return console.error('port1 not ready');
-        }
+  if (!port || !port.writable) {
+    console.error(`No writable port for ID ${command}`);
+    return;
+  }
 
-        port1.write(command + '\n', (err) => {
-            if (err) {
-                console.error('Error writing to Arduino:', err.message);
-            } else {
-                console.log('Command sent to Arduino:', command);
-            }
-        });
+  port.write(command + '\n', (err) => {
+    if (err) {
+      console.error('Error writing to Arduino:', err.message);
+    } else {
+      console.log(`Command sent to Arduino ID ${command}:`, command);
     }
-    if (command === '2') {
-        if (!isConnected || !port2.writable) {
-            return console.error('port2 not ready');
-        }
-
-        port2.write(command + '\n', (err) => {
-            if (err) {
-                console.error('Error writing to Arduino:', err.message);
-            } else {
-                console.log('Command sent to Arduino:', command);
-            }
-        });
-    }
+  });
 }
+
 
 module.exports = {
     sendToArduino,

@@ -15,7 +15,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial); // Wait for serial port to connect (for some boards)
 
-  sprintf(buffer, "Arduino %d is ready.", DEVICE_ID);
+  sprintf(buffer, "ID:%d", DEVICE_ID);
   Serial.println(buffer);
 }
 
