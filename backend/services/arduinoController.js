@@ -17,7 +17,7 @@ port1.on('open', () => {
     parser = port1.pipe(new ReadlineParser({ delimiter: '\n' }));
 
     parser.on('data', data => {
-        console.log('Received from Arduino:', data.trim());
+        console.log('Received from Arduino on USB0:', data.trim());
     });
 });
 port2.on('open', () => {
@@ -27,7 +27,7 @@ port2.on('open', () => {
     parser = port2.pipe(new ReadlineParser({ delimiter: '\n' }));
 
     parser.on('data', data => {
-        console.log('Received from Arduino:', data.trim());
+        console.log('Received from Arduino on USB1:', data.trim());
     });
 });
 
