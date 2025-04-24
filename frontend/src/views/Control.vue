@@ -116,7 +116,7 @@ async function runNextAction() {
 
     try {
       const res = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: nextAction.value
+        command: "TOGGLE" // nextAction.value
       });
 
     } catch (err) {
