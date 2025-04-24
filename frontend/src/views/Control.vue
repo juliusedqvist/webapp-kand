@@ -1,6 +1,6 @@
 <template>
-  <div class="column-ui">
-    <div class="row-ui">
+  <div class="row-ui">
+    <div class="column-ui">
       <div class="svg-wrapper">
         <img src="@/assets/Chambers.svg" class="robot-svg" />
 
@@ -10,7 +10,7 @@
           :key="'A' + i"
           class="chamber-btn"
           :style="{
-            top: i <= 12 ? '44.9%' : '50.7%',
+            top: i <= 12 ? '82.6%' : '93.3%',
             left: `${6.3 + ((i - 1) % 12) * (66 / 11)}%`,
             transform: 'translate(-50%, -50%)'
           }"
@@ -25,7 +25,7 @@
           :key="'B' + i"
           class="chamber-btn"
           :style="{
-            top: i <= 12 ? '23.1%' : '29%',
+            top: i <= 12 ? '42.5%' : '53.4%',
             left: `${30 + ((i - 1) % 12) * (66 / 11)}%`,
             transform: 'translate(-50%, -50%)'
           }"
@@ -35,13 +35,32 @@
         </button>
 
         <!-- Additional chamber-like buttons -->
-        <button class="chamber-btn" style="top: 23.1%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C1')">C1</button>
-        <button class="chamber-btn" style="top: 29%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C2')">C2</button>
-        <button class="chamber-btn" style="top: 5.2%; left: 10.8%; transform: translate(-50%, -50%);" @click="handleChamberClick('P')">P</button>
+        <button class="chamber-btn" style="top: 42.5%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C1')">C1</button>
+        <button class="chamber-btn" style="top: 53.4%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C2')">C2</button>
+        <button class="chamber-btn" style="top: 9.6%; left: 10.8%; transform: translate(-50%, -50%);" @click="handleChamberClick('P')">P</button>
       </div>
 
-      <!-- Panels -->
-      <div class="panel-stack">
+        <!-- Log Section -->
+      <div class="log" style="top: 0%; left: 2.25%;">
+        <div class="log-header">
+          <span>Log</span>
+          <button class="clear-log-btn" @click="confirmClearLog">Clear</button>
+        </div>
+        <div class="log-box" ref="logBox">
+          <div
+            v-for="(entry, index) in logs"
+            :key="index"
+            class="log-entry"
+            :class="entry.type"
+          >
+            {{ entry.message }}
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <!-- Panels -->
+    <div class="panel-stack">
         <div class="next-action-panel">
           <div class="panel-header">Commands</div>
           <div class="btn-display">
@@ -62,25 +81,7 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Log Section -->
-    <div class="log" style="top: 0%; left: 2.25%;">
-      <div class="log-header">
-        <span>Log</span>
-        <button class="clear-log-btn" @click="confirmClearLog">Clear</button>
-      </div>
-      <div class="log-box" ref="logBox">
-        <div
-          v-for="(entry, index) in logs"
-          :key="index"
-          class="log-entry"
-          :class="entry.type"
-        >
-          {{ entry.message }}
-        </div>
-      </div>
-    </div>
+    
   </div>
 </template>
 
@@ -111,20 +112,24 @@ function clearNextAction() {
 }
 
 async function runNextAction() {
-  if (nextAction.value) {
-    log(`Running: ${nextAction.value}`, 'info');
+  const tempActionValue = nextAction.value
+  clearNextAction()
+  if (tempActionValue) {
+    log(`Running: ${tempActionValue}`, 'info');
+
 
     try {
       const res = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: nextAction.value
+        command: tempActionValue
       });
 
     } catch (err) {
       const msg = err.response?.data?.error || err.message || 'Unknown error';
     }
 
-    clearNextAction()
+    
   }
+
 }
 
 async function logCommand(command) {
@@ -168,27 +173,28 @@ watch(
 
 <style scoped>
 .column-ui {
-  width: 100%;
+  width: 70%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items:flex-start; /* Align to the left */
   justify-content: flex-start; /* Align to the top */
   margin: 0;
-  padding: 0;
-  /*background-color: yellow;*/
+  padding: 1em;
+  /*background-color: yellow;/**/
+  
 }
 
 .row-ui {
   width: 100%;
-  height: 75%;
+  height: 100%;
   display: flex;
   flex-direction: row;
   align-items: flex-start; /* Align to the left */
   justify-content: flex-start; /* Align to the top */
   margin: 0;
   padding: 0;
-  /*background-color: rgb(55, 0, 255);*/
+  /*background-color: rgb(0, 255, 64);/**/
 }
 
 .robot-svg {
@@ -199,16 +205,20 @@ watch(
   height: auto; /* Maintain aspect ratio */
   object-fit: contain; /* Keeps the SVG inside the container without stretching */
   pointer-events: none;
+  /*max-height: 68vh;
+  max-width: 130vh;*/
   /*background-color: red;  /* Added for debugging */
 }
 
 
 .svg-wrapper {
   position: relative; /* Make sure this is relative to provide context for absolute positioning */
-  top: 0.5rem;
-  left: 0.5rem;
-  width: 65%; /* Adjust width as needed */
-  aspect-ratio: 1 / 1; /* Keeps the container a square */
+  /*top: 0.5rem;
+  left: 0.5rem;*/
+  width: 100%; /* Adjust width as needed */
+  /*max-height: 68vh;
+  max-width: 130vh;*/
+  aspect-ratio: 1.84 / 1; /* Keeps the container a square */
   margin-top: 0; /* Ensure no margin at the top */
   /*background-color: blue; /* Added for debugging */
 
@@ -353,9 +363,11 @@ watch(
   position: relative;
   background-color: #f7f7f7;
   width: 60vw;
-  height: 11vw;
+  height: 25vh;
+  max-height: 20vw;
+  margin-left: 0.15em;
   font-size: 1.1vw;
-  padding: 0;
+  margin-top: 0.5em;
   border-radius: 0.5em;
   overflow: hidden;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
