@@ -112,20 +112,24 @@ function clearNextAction() {
 }
 
 async function runNextAction() {
-  if (nextAction.value) {
-    log(`Running: ${nextAction.value}`, 'info');
+  const tempActionValue = nextAction.value
+  clearNextAction()
+  if (tempActionValue) {
+    log(`Running: ${tempActionValue}`, 'info');
+
 
     try {
       const res = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: nextAction.value
+        command: tempActionValue
       });
 
     } catch (err) {
       const msg = err.response?.data?.error || err.message || 'Unknown error';
     }
 
-    clearNextAction()
+    
   }
+
 }
 
 async function logCommand(command) {
