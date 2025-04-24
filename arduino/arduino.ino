@@ -21,14 +21,14 @@ void loop() {
     if (received == '\n') {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
 
-      if (incomingCommand.equalsIgnoreCase("TOGGLE")) {
-        ledState = !ledState;
-        digitalWrite(ledPin, ledState);
-        Serial.print("LED is now ");
-        Serial.println(ledState ? "ON" : "OFF");
-      } else {
-        Serial.println("Unknown command.");
-      }
+      // if (incomingCommand.equalsIgnoreCase("TOGGLE")) {
+      ledState = !ledState;
+      digitalWrite(ledPin, ledState);
+      Serial.print("LED is now ");
+      Serial.println(ledState ? "ON" : "OFF");
+      // } else {
+      //   Serial.println("Unknown command.");
+      // }
 
       incomingCommand = ""; // Reset buffer
     } else {

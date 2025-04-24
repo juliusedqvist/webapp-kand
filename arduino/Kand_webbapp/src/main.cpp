@@ -30,7 +30,5 @@ void loop() {
   digitalWrite(9, LOW);
   digitalWrite(8, LOW);
   Serial.println(encodercts);
-  delay(500);
-  delay(500);
-
+  delay(1000);
 }
