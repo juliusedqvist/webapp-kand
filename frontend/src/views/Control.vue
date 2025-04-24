@@ -65,9 +65,9 @@
           <div class="panel-header">Commands</div>
           <div class="btn-display">
             <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP')">STOP</button>
-            <button class="panel-btn" style="background-color: #f9cb00; color: white; height: 3vw;" @click="logCommand('RESET')">RESET</button>
-            <button class="panel-btn" style="background-color: #4cd000; color: white; height: 3vw;" @click="logCommand('RESUME')">RESUME</button>
-            <button class="panel-btn" style="background-color: #004073; color: white; height: 3vw;" @click="runNextAction">RUN NEXT</button>
+            <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET')">RESET</button>
+            <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME')">RESUME</button>
+            <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN NEXT</button>
           </div>
         </div>
 
@@ -336,7 +336,7 @@ watch(
 
 .panel-btn {
   width: 100%;
-  height: 3.2vw;
+  height: 3.4vw;
   font-weight: bold;
   background-color: #fbfbfb;
   color: black;
@@ -368,6 +368,7 @@ watch(
   margin-left: 0.15em;
   font-size: 1.1vw;
   margin-top: 0.5em;
+  border: 0.25vw solid #004073;
   border-radius: 0.5em;
   overflow: hidden;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
