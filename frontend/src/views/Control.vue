@@ -1,5 +1,6 @@
 <template>
   <div class="row-ui">
+    <!-- Chambers, buttons, and log -->
     <div class="column-ui">
       <div class="svg-wrapper">
         <img src="@/assets/Chambers.svg" class="robot-svg" />
@@ -59,7 +60,7 @@
       </div>
       
     </div>
-    <!-- Panels -->
+    <!-- Command and action panels -->
     <div class="panel-stack">
         <div class="next-action-panel">
           <div class="panel-header">Commands</div>
@@ -103,7 +104,6 @@ function handleChamberClick(label) {
     selectedChambers.value.push(label)
     nextAction.value = `${selectedChambers.value[0]} ⇒ ${selectedChambers.value[1]}`
   }
-  // No log generation here
 }
 
 function clearNextAction() {
@@ -177,12 +177,10 @@ watch(
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items:flex-start; /* Align to the left */
-  justify-content: flex-start; /* Align to the top */
+  align-items:flex-start; 
+  justify-content: flex-start; 
   margin: 0;
-  padding: 1em;
-  /*background-color: yellow;/**/
-  
+  padding: 1em;  
 }
 
 .row-ui {
@@ -190,55 +188,35 @@ watch(
   height: 100%;
   display: flex;
   flex-direction: row;
-  align-items: flex-start; /* Align to the left */
-  justify-content: flex-start; /* Align to the top */
+  align-items: flex-start; 
+  justify-content: flex-start; 
   margin: 0;
   padding: 0;
-  /*background-color: rgb(0, 255, 64);/**/
 }
 
 .robot-svg {
-  position: absolute; /* Absolute position relative to .svg-wrapper */
-  top: 0; /* Adjust this to place SVG as needed */
-  left: 0; /* Align left of the SVG with the left of the container */
-  width: 100%; /* Ensure it fills the container width */
-  height: auto; /* Maintain aspect ratio */
-  object-fit: contain; /* Keeps the SVG inside the container without stretching */
+  position: absolute;
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: auto; 
+  object-fit: contain;
   pointer-events: none;
-  /*max-height: 68vh;
-  max-width: 130vh;*/
-  /*background-color: red;  /* Added for debugging */
 }
 
 
 .svg-wrapper {
-  position: relative; /* Make sure this is relative to provide context for absolute positioning */
-  /*top: 0.5rem;
-  left: 0.5rem;*/
-  width: 100%; /* Adjust width as needed */
-  /*max-height: 68vh;
-  max-width: 130vh;*/
-  aspect-ratio: 1.84 / 1; /* Keeps the container a square */
-  margin-top: 0; /* Ensure no margin at the top */
-  /*background-color: blue; /* Added for debugging */
+  position: relative; 
+  width: 100%;
+  aspect-ratio: 1.84 / 1; 
+  margin-top: 0; 
 
 }
-/*
+
 .chamber-btn {
   position: absolute;
   z-index: 10;
-  padding: 0.7% 1.2%;
-  font-size:100%;
-  background-color: #fbfbfb;
-  color: rgb(0, 0, 0);
-  border: 2px solid black;
-  border-radius: 10px;
-  cursor: pointer;
-}*/
-.chamber-btn {
-  position: absolute;
-  z-index: 10;
-  font-size: 1.2vw; /* Scales with viewport width */
+  font-size: 1.2vw; 
   width: 3vw;
   height: 2.7vw;
   background-color: #fbfbfb;
@@ -255,7 +233,6 @@ watch(
 
 .chamber-btn:hover {
   background-color: #004073;
-  /*box-shadow: 0px 0px 8px #3ba7ff; /* Blue glow */
   color: rgb(255, 255, 255);
 }
 
@@ -270,7 +247,6 @@ watch(
 
 .next-action-panel {
   position: relative;
-  /*top:65%;*/
   width: 15vw;
   height: auto;
   background-color: #004073;
@@ -289,10 +265,10 @@ watch(
   display: flex;
   padding-top: 2vw;
   flex-direction: column;
-  gap: 2vw; /* Optional spacing between the two panels */
+  gap: 2vw; 
   position: relative;
   top: 0%;
-  left: 2vw; /* Adjust as needed */
+  left: 2vw; 
 }
 
 
@@ -354,8 +330,7 @@ watch(
 
 .panel-btn:hover{
   background-color: #004073;
-  transform: scale(1.05) /*translate(-80%, -20%)*/;
-  /*box-shadow: 0px 4px 8px #3ba7ff; /* Blue glow */
+  transform: scale(1.05);
   color: rgb(255, 255, 255);
 }
 
@@ -368,7 +343,6 @@ watch(
   margin-left: 0.15em;
   font-size: 1.1vw;
   margin-top: 0.5em;
-  /*border-bottom: 0.25vw solid #004073;*/
   border-radius: 0.5em;
   overflow: hidden;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.45);
@@ -397,7 +371,6 @@ watch(
   border-bottom-left-radius: 0.5em;
 }
 
-/* Prevent horizontal scroll */
 .log-box::-webkit-scrollbar:horizontal {
   display: none;
 }
@@ -406,7 +379,6 @@ watch(
 .log-entry {
   font-weight: 500;
   margin-bottom: 0.3em;
-  /*white-space: nowrap; /* Prevents wrapping, optional */
 }
 
 .log-entry.info {
@@ -421,10 +393,6 @@ watch(
   color: #b00020;
 }
 
-/* Firefox support */
-
-
-/* WebKit-based browsers (Chrome, Edge, Safari) */
 .log-box::-webkit-scrollbar {
   width: 0.8em;
   
@@ -433,8 +401,6 @@ watch(
 .log-box::-webkit-scrollbar-track {
   background: #dedede;
   border-bottom-right-radius: 0.25em;
-  border-color: #004073;
-  
 }
 
 .log-box::-webkit-scrollbar-thumb {
