@@ -13,6 +13,7 @@ void count(void) {
 }
 
  // dennan kod är bara för att testa med multimeter KÖR INTE MED MOTORERNA
+ //  bara för tesing
 void setup() {
   // put your setup code here, to run once:
   pinMode(2, INPUT);
