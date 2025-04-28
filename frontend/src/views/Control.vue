@@ -345,7 +345,6 @@ watch(
   margin-top: 0.5em;
   border-radius: 0.5em;
   overflow: hidden;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.45);
   font-family: monospace;
   display: flex;
   flex-direction: column;
