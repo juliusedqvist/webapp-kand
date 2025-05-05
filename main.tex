@@ -1,0 +1,41 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[swedish]{babel}
+\usepackage{xcolor}
+\usepackage{siunitx}
+
+\title{Documentation}
+\author{Julius Edqvist, Filip Michelsonas, Alexander Reider, Erik Österling}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{PCB}
+The PCB consists of three arduinos and three DRV8871 motor controllers connecting to the arm which are all connected to a Raspberry pi 5 for easy navigation and control. The PCB will be powered by \textcolor{red}{CHANGE WHEN YOU KNOW}
+\subsection{Pin Layouts}
+\subsubsection{8-pin white connectors}
+On the PCB there are two eight-pin white connectors, which are the connectors for the mechanical stops and signals for the radial and angular motors. The first pin starts at the bottom, and sends out a one when the motor has made a full rotation. The second and third pin send out a continuous square wave with the movement of the arm. These waves are phase-shifted to each other with the shift being to the left or right depending on what direction the arm is moving. If one signal is a $1$ whilst the other signal is rising it is moving forwards and vice versa. 
+
+The fourth pin is $5$ V power to the signals mentioned above with the fifth and sixth pin being ground. Pin seven is an output for the mechanical stop, which will output a $1$ when it is reached using the IR emitter HOA-1871-031. The eighth pin is a $5$ V power connector for the IR emitter. 
+
+\subsubsection{8-pin red connector}
+The large red eight-pin connector is similar to the white, but with the IR emitter seperated into a smaller four-pin white connector. The four first pins are ground, and the fifth pin recieves $5$ V power. Pin six and seven have the same function as the second and third pin on the 8-pin white connectors. The eighth pin is unknown at the time \textcolor{red}{CHANGE THIS}. 
+
+\subsubsection{2-pin red connector}
+This connector leads to the brake, the first pin starting from the bottom is connected straight to $12$ V whilst the second pin is connected to a transistor which is controlled by one of the arduinos. When the arduino sends a HIGH to the transistor, ground will open and voltage will pass through the brake. 
+
+\subsubsection{4-pin white connector}
+This connector is attached to the same HOA-1871-031 as mentioned above. The first pin starting from the top connects to $5$ V power with a $180 
+\Omega$ resistance. The second and third pins connect to ground and are connected to each other on the main board. The fourth pin sends the signal to the arduino. The signal could either be a $0$ when nothing is blocking the sensor or a $1$ when the arm has reached the maximum distance. 
+
+
+\subsubsection{Green screw terminals}
+The terminals are connected to the motor controllers and give $12$ V power to the motors. More about the controllers is mentioned below.
+
+\subsection{DRV-8871 motor controllers}
+The motor controllers are connected to the Arduino which will control how the motors move. When one pin is on and the other off the motor will spin in one direction. When the opposite pin is on and the other off the motor will spin in the other direction. When both pins are on or off the motor will not spin. 
+
+
+\end{document}
