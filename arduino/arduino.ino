@@ -32,6 +32,7 @@ void loop() {
       ledState = !ledState;
       digitalWrite(ledPin, ledState);
       Serial.print("LED is now ");
+      Serial.print("non-existant but it's supposed to be ");
       Serial.println(ledState ? "ON" : "OFF");
       // } else {
       //   Serial.println("Unknown command.");
