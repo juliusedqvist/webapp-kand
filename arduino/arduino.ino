@@ -103,6 +103,8 @@ void loop() {
       }
       if(prevLocationNumber == locationNumber){
         stopDist = locationNumber - stoppedChargeAt;
+        Serial.println(prevLocationNumber);
+        Serial.println(locationNumber);
         Serial.print("Stop distance: ");
         Serial.println(stopDist);
         missionIndex = 1;
@@ -113,7 +115,9 @@ void loop() {
     prevLocationNumber = locationNumber;
     delay(10);
   } else if(missionIndex == 1){
-    if(locationNumber > stopDist){
+	Serial.print("Location number: ");
+    Serial.println(locationNumber);
+	if(locationNumber > stopDist){
       analogWrite(ZDriveF, 0);
       analogWrite(ZDriveB, 200);
     } else{
