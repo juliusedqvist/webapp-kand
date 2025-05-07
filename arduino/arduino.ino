@@ -34,10 +34,10 @@ void setup() {
 }
 
 int locationNumber = 0; //GOES FROM 0 TO ca 23000
-int missionIndex = 0;
+int missionIndex = 6;
 
 //mission 0 constants and variables:
-int chargeUpDistance = -1;
+int chargeUpDistance = 6000;
 int prevLocationNumber = locationNumber;
 int stoppedChargeAt = 0;
 
@@ -57,8 +57,23 @@ int stopDistSum = 0;
 int targetLocationNumber = 10000;
 
 //mission 3 variables:
-int counter = 0;
+float counter = 0;
 int goInDir = 1;
+
+//mission 6 constants:
+float I = 0.00000004;
+float integral = 0;
+
+
+
+//LOOP AND PWM VARIABLES
+int delayLoopsLeft = 0;
+
+bool PWMSimulationOnOff = false;
+float PWMFullPulseTime = 20.0;
+float PWMFraction = 0.0;
+float generalSpeedFactor = 0.6;
+int movementDir = 0; //-1 for backwards, +1 for forwards
 
 void loop() {
   
@@ -85,87 +100,146 @@ void loop() {
 
 
 
-
+/*
   analogWrite(lampDebug, 0.011*locationNumber*0.7);
   if(locationNumber + 200 > targetLocationNumber && locationNumber - 200 < targetLocationNumber){
     analogWrite(lampDebug, 255);
-  }
+  }*/
   
-  if(missionIndex == 0){
-    if(locationNumber < chargeUpDistance){
-      analogWrite(ZDriveF, 200);
-      analogWrite(ZDriveB, 0);
-    } else{
+
+  if(delayLoopsLeft > 0){
+    delayLoopsLeft = delayLoopsLeft - 1;
+  } else{
+    if(missionIndex == 0){
+      if(locationNumber < chargeUpDistance){
+        PWMFraction = 0.8;
+        movementDir = 1;
+//        analogWrite(ZDriveF, 200);
+//        analogWrite(ZDriveB, 0);
+      } else{
+        PWMFraction = 0;
+        movementDir = 0;
+//        analogWrite(ZDriveF, 0);
+//        analogWrite(ZDriveB, 0);
+        if(stoppedChargeAt == 0){ //Just in case we dont stop exactly at the ChargeUpDistance. StoppedChargeAt ~ ChargeUpDistance
+          stoppedChargeAt = locationNumber;
+        }
+        if(prevLocationNumber == locationNumber){
+          stopDist = locationNumber - stoppedChargeAt;
+          Serial.print("Stop distance: ");
+          Serial.println(stopDist);
+          missionIndex = 1;
+          stoppedChargeAt = 0;
+          delayLoopsLeft = 20;
+        }
+      }
+      prevLocationNumber = locationNumber;
+    } else if(missionIndex == 1){
+      if(locationNumber > stopDist){
+        PWMFraction = 0.8;
+        movementDir = -1;
+//        analogWrite(ZDriveF, 0);
+//        analogWrite(ZDriveB, 200);
+      } else{
+        PWMFraction = 0;
+        movementDir = 0;
+//        analogWrite(ZDriveF, 0);
+//        analogWrite(ZDriveB, 0);
+        delayLoopsLeft = 20;
+        missionIndex = 0;
+      }
+    } else if(missionIndex == 2){
+      if(locationNumber < targetLocationNumber - stopDist){
+        PWMFraction = 0.8;
+        movementDir = 1;
+//        analogWrite(ZDriveF, 200);
+//        analogWrite(ZDriveB, 0);
+      } else if(locationNumber > targetLocationNumber + stopDist){
+        PWMFraction = 0.8;
+        movementDir = -1;
+//        analogWrite(ZDriveF, 0);
+//        analogWrite(ZDriveB, 200);
+      } else {
+        PWMFraction = 0;
+        movementDir = 0;
+//        analogWrite(ZDriveF, 0);
+//        analogWrite(ZDriveB, 0);
+      }
+    } else if (missionIndex == 3){
+      
       analogWrite(ZDriveF, 0);
       analogWrite(ZDriveB, 0);
-      if(stoppedChargeAt == 0){ //Just in case we dont stop exactly at the ChargeUpDistance. StoppedChargeAt ~ ChargeUpDistance
-        stoppedChargeAt = locationNumber;
-      }
-      if(prevLocationNumber == locationNumber){
-        stopDist = locationNumber - stoppedChargeAt;
-        Serial.println(prevLocationNumber);
-        Serial.println(locationNumber);
-        Serial.print("Stop distance: ");
-        Serial.println(stopDist);
-        missionIndex = 1;
-        stoppedChargeAt = 0;
-        delay(500);
-      }
-    }
-    prevLocationNumber = locationNumber;
-    delay(10);
-  } else if(missionIndex == 1){
-	Serial.print("Location number: ");
-    Serial.println(locationNumber);
-	if(locationNumber > stopDist){
+
+      delay(250);
+
       analogWrite(ZDriveF, 0);
       analogWrite(ZDriveB, 200);
-    } else{
+
+      delay(750);
+      
       analogWrite(ZDriveF, 0);
       analogWrite(ZDriveB, 0);
+
+      delay(250);
+
+      analogWrite(ZDriveF, 200);
+      analogWrite(ZDriveB, 0);
+
+      delay(750);
+    } else if(missionIndex == 4){
+      Serial.print("Currently the counter is ");
+      Serial.println(counter);
       delay(500);
-      missionIndex = 0;
+      counter = counter + 1;
+    } else if (missionIndex == 5){
+      movementDir = 1;
+      counter = counter + 1*PWMFullPulseTime;
+      float divBy = 3000.0;
+      if(counter > divBy*2*PI){
+        counter = counter - divBy*2*PI;
+      }
+      float speedNDir = sin(counter/divBy);
+      PWMFraction = 0.5*abs(speedNDir);
+      if(speedNDir < 0.0) movementDir = -1;
+    } else if (missionIndex == 6){
+      float e = targetLocationNumber - locationNumber;
+      integral = integral + e*PWMFullPulseTime;
+      Serial.println(integral);
+      float speedNDir = I*integral; //+e/12000;
+      PWMFraction = 0.8*abs(speedNDir);
+      movementDir = 1;
+      if(speedNDir < 0.0) movementDir = -1;
     }
-  } else if(missionIndex == 2){
-    if(locationNumber < targetLocationNumber - stopDist){
-      analogWrite(ZDriveF, 200);
-      analogWrite(ZDriveB, 0);
-    } else if(locationNumber > targetLocationNumber + stopDist){
-      analogWrite(ZDriveF, 0);
-      analogWrite(ZDriveB, 200);
-    } else {
-      analogWrite(ZDriveF, 0);
-      analogWrite(ZDriveB, 0);
+  }
+
+  if(PWMSimulationOnOff){
+    PWMSimulationOnOff = false;
+    if(movementDir == -1){
+      digitalWrite(ZDriveF, LOW);
+      digitalWrite(ZDriveB, HIGH);
+    } else if (movementDir == 1){
+      digitalWrite(ZDriveF, HIGH);
+      digitalWrite(ZDriveB, LOW);
+    } else{
+      digitalWrite(ZDriveF, LOW);
+      digitalWrite(ZDriveB, LOW);
     }
-    delay(10);
-  } else if (missionIndex == 3){
-    
-    analogWrite(ZDriveF, 0);
-    analogWrite(ZDriveB, 0);
-
-    delay(250);
-
-    analogWrite(ZDriveF, 0);
-    analogWrite(ZDriveB, 200);
-
-    delay(750);
-    
-    analogWrite(ZDriveF, 0);
-    analogWrite(ZDriveB, 0);
-
-    delay(250);
-
-    analogWrite(ZDriveF, 200);
-    analogWrite(ZDriveB, 0);
-
-    delay(750);
-  } else if(missionIndex == 4){
-    Serial.print("Currently the counter is ");
-    Serial.println(counter);
-    delay(500);
-    counter = counter + 1;
+    digitalWrite(lampDebug, HIGH);
+    delay(PWMFullPulseTime*PWMFraction*generalSpeedFactor);
+  } else{
+    PWMSimulationOnOff = true;
+    digitalWrite(ZDriveF, LOW);
+    digitalWrite(ZDriveB, LOW);
+    digitalWrite(lampDebug, LOW);
+    delay(PWMFullPulseTime*(1.0-PWMFraction*generalSpeedFactor));
   }
 }
+
+
+
+
+
+
   /*
   delay((int)dt*1000);
   if(counter > 100){
