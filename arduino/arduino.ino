@@ -168,10 +168,17 @@ void loop() {
  
 
 
-  analogWrite(lampDebug, 0.11*varvNumber*0.7);
+  analogWrite(lampDebug, 0.11*locationNumber*0.7);
   if(locationNumber + 5 > targetLocationNumber && locationNumber - 5 < targetLocationNumber){
     analogWrite(lampDebug, 0);
   }
+
+  
+  Serial.print(varvNumber);
+  Serial.print(" ");
+  Serial.println(locationNumber);
+
+  
   //analogWrite(lampDebug, 0.077*locationNumber*255);
   delay(PWMFullPulseTime);
 }
@@ -192,9 +199,6 @@ void ZFeedb1INTERRUPT(){
 void ZFeedbVarvINTERRUPT(){
   
   varvNumber += 1;
-  Serial.print(varvNumber);
-  Serial.print(" ");
-  Serial.println(locationNumber);
   /*
   if(digitalRead(ZFeedb2) == HIGH){
     varvNumber += 1;
