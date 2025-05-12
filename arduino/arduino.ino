@@ -222,10 +222,10 @@ void ZFeedbVarvINTERRUPT(){
     }
   }
     
-  if(digitalRead(ZFeedb1) == HIGH){
+  if(digitalRead(ZFeedb2) == HIGH){
     varvNumber2 += 1;
   }
-  if(digitalRead(ZFeedb1) == LOW){
+  if(digitalRead(ZFeedb2) == LOW){
     varvNumber2 -= 1;
   }
   
@@ -235,5 +235,5 @@ void ZFeedbVarvINTERRUPT(){
   Serial.print(" ");
   Serial.println(locationNumber);
  // locationNumber = 1000.0*round(locationNumber/1000.0);
- // locationNumber = 1000*varvNumber2;
+  locationNumber = 1000*varvNumber;
 }
