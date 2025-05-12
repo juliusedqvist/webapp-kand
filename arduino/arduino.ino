@@ -230,8 +230,9 @@ void ZFeedbVarvINTERRUPT(){
   }
   
   Serial.print(varvNumber);
-  Serial.print(" ");
+  Serial.print(" : ");
   Serial.print(varvNumber2);
-  Serial.print(" ");
+  Serial.print(" : ");
   Serial.println(locationNumber);
+  Serial.print(" : ");
 }
