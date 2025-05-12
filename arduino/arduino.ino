@@ -229,10 +229,10 @@ void ZFeedbVarvINTERRUPT(){/*
     varvNumber2 -= 1;
   }
   */
+  Serial.println(locationNumber);
   locationNumber = 1000.0*round(locationNumber/1000.0);
   
   
-  Serial.println(locationNumber);
   
  /* Serial.print(varvNumber);
   Serial.print(" : ");
