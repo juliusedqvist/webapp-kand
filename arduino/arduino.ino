@@ -212,9 +212,16 @@ void ZFeedb1INTERRUPT(){
 
 
 void ZFeedbVarvINTERRUPT(){
-  
-  varvNumber += 1;
-  
+  //first, tell if it's valid
+  if(abs(1000*varvNumber - locationNumber) > 300){
+    if(locationNumber > 1000*varvNumber){
+      varvNumber += 1;
+    }
+    if(locationNumber < 1000*varvNumber){
+      varvNumber -= 1;
+    }
+  }
+    
   if(digitalRead(ZFeedb2) == HIGH){
     varvNumber2 += 1;
   }
