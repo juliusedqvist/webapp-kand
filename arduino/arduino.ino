@@ -186,11 +186,15 @@ void loop() {
   if(speedNDir < 0.0) movementDir = -1;
 
   if(movementDir == 1){
-    analogWrite(ZDriveF, 255); //Driving it and braking simultaneously is was reccomended by data sheet
-    analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
+  //  analogWrite(ZDriveF, 255); //Driving it and braking simultaneously is was reccomended by data sheet
+   // analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
+    digitalWrite(ZDriveF, HIGH);
+    digitalWrite(ZDriveB, LOW);
   } else if (movementDir == -1){
-    analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
-    analogWrite(ZDriveB, 255);
+  //  analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
+  //  analogWrite(ZDriveB, 255);
+    digitalWrite(ZDriveF, LOW);
+    digitalWrite(ZDriveB, HIGH);
   } else{
     analogWrite(ZDriveF, 0);
     analogWrite(ZDriveB, 0);
@@ -211,7 +215,7 @@ void ZFeedb1INTERRUPT(){
 }
 
 
-void ZFeedbVarvINTERRUPT(){/*
+void ZFeedbVarvINTERRUPT(){
   //first, tell if it's valid
   if(abs(1000*varvNumber - locationNumber) > 300){
     if(locationNumber > 1000*varvNumber){
@@ -228,11 +232,8 @@ void ZFeedbVarvINTERRUPT(){/*
   if(digitalRead(ZFeedb2) == LOW){
     varvNumber2 -= 1;
   }
-  */
-  Serial.println(locationNumber);
+  
   locationNumber = 1000.0*round(locationNumber/1000.0);
-  
-  
   
  /* Serial.print(varvNumber);
   Serial.print(" : ");
