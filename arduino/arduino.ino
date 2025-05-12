@@ -51,7 +51,7 @@ float PWMFraction = 0.0;
 float generalSpeedFactor = 0.5;
 int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
-
+int delayloops = 0;
 
 
 // put function declarations here:
@@ -116,57 +116,63 @@ void loop() {
 
 
   float speedNDir = 0;
-  if(missionIndex == 1){
-    float e = targetLocationNumber - locationNumber;
-    float derivative = (locationNumber - prevLocationNumber)/delayTime;
-    speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
-  
-  
-    if(prevLocationNumber != locationNumber){
-      integral = integral + e*delayTime;
-    }
-    if(1000*derivative < 250){
-      if(abs(locationNumber - targetLocationNumber) < 1000){
-        if(locationNumber > targetLocationNumber){
-          antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
-        } else{
-          antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+  if(delayloops > 0){
+    delayloops -= 1;
+  } else{
+    if(missionIndex == 1){
+      float e = targetLocationNumber - locationNumber;
+      float derivative = (locationNumber - prevLocationNumber)/delayTime;
+      speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+    
+    
+      if(prevLocationNumber != locationNumber){
+        integral = integral + e*delayTime;
+      }
+      if(1000*derivative < 250){
+        if(abs(locationNumber - targetLocationNumber) < 1000){
+          if(locationNumber > targetLocationNumber){
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+          } else{
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+          }
         }
       }
-    }
-    prevLocationNumber = locationNumber;
-   
-    if(locationNumber > targetLocationNumber - 5 && speedNDir > 0){
-      speedNDir = 0;
-      integral = 0;
-      antistuckCurrentPWMBonus = 0;
-    }
-    if(locationNumber < targetLocationNumber + 5 && speedNDir < 0){
-      speedNDir = 0;
-      integral = 0;
-      antistuckCurrentPWMBonus = 0;
-    }
-    if(abs(locationNumber - targetLocationNumber) < 5 && locationNumber - prevLocationNumber == 0){
-      if(targetLocationNumber != 1000){
-        targetLocationNumber = 1000;
-      } else{
-        targetLocationNumber = 9000;
+      prevLocationNumber = locationNumber;
+     
+      if(locationNumber > targetLocationNumber - 5 && speedNDir > 0){
+        speedNDir = 0;
+        integral = 0;
+        antistuckCurrentPWMBonus = 0;
       }
-    }
-    if(abs(locationNumber - targetLocationNumber) > 2000){
-      antistuckCurrentPWMBonus = 0;
-    }
-
+      if(locationNumber < targetLocationNumber + 5 && speedNDir < 0){
+        speedNDir = 0;
+        integral = 0;
+        antistuckCurrentPWMBonus = 0;
+      }
+      if(abs(locationNumber - targetLocationNumber) < 5 && locationNumber - prevLocationNumber == 0){
+        if(targetLocationNumber != 1000){
+          targetLocationNumber = 1000;
+        } else{
+          targetLocationNumber = 7875;
+        }
+        delayloops = 200;
+      }
+      if(abs(locationNumber - targetLocationNumber) > 2000){
+        antistuckCurrentPWMBonus = 0;
+      }
   
-  } else if(missionIndex == 2){
-   /* if(digitalRead(ZFeedbHitEnd)){
-      missionIndex = 0;
-      locationNumber = 0;
-      varvNumber = 0;
-      integral = 0;
-      antistuckCurrentPWMBonus = 0;
-    }*/
-    speedNDir = -0.4;
+    
+    } else if(missionIndex == 2){
+     /* if(digitalRead(ZFeedbHitEnd)){
+        missionIndex = 0;
+        locationNumber = 0;
+        varvNumber = 0;
+        integral = 0;
+        antistuckCurrentPWMBonus = 0;
+      }*/
+      speedNDir = -0.4;
+    }
+  
   }
 
 
