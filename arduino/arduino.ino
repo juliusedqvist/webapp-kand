@@ -6,6 +6,8 @@
 #define ZFeedb1 2
 #define ZFeedb2 5
 #define ZFeedbVarv 3
+#define ZFeedbHitEnd 2
+//feedBVarv har pin 3. Feedb2 har 5?
 
 
 #define lampDebug 6
@@ -20,35 +22,16 @@ char buffer[64];
 String incomingCommand = "";
 
 
-// put function declarations here:
-void ZFeedb1INTERRUPT();
-void ZFeedbVarvINTERRUPT();
+//0: Stand still
+//1: Move to targetLocationNumber
+//2: Reset
+int missionIndex = 1;
 
-
-void setup() {
-  // put your setup code here, to run once:
-  pinMode(ZDriveF, OUTPUT);
-  pinMode(ZDriveB, OUTPUT);
-  pinMode(lampDebug, OUTPUT);
-  pinMode(ZFeedb1, INPUT);
-  pinMode(ZFeedb2, INPUT);
-  pinMode(ZFeedbVarv, INPUT);
-
-
-  attachInterrupt(digitalPinToInterrupt(ZFeedb1), ZFeedb1INTERRUPT, RISING);
-  attachInterrupt(digitalPinToInterrupt(ZFeedbVarv), ZFeedbVarvINTERRUPT, RISING);
-
-
-  Serial.begin(9600);
-  while (!Serial); // Wait for serial port to connect (for some boards)
-  sprintf(buffer, "ID:%d", DEVICE_ID);
-  Serial.println(buffer);
-}
 
 
 float locationNumber = 0; //GOES FROM 0 TO ca 23000
 float varvNumber = 0;
-int missionIndex = 6;
+float varvNumber2 = 0;
 int prevLocationNumber = locationNumber;
 
 
@@ -62,16 +45,42 @@ float I = 0.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
 
 
-float D = 0.045; //0.05 is close to the dynamic friction constant, it seems
+float D = 0.045; //this is close to the dynamic friction constant, it seems
 float integral = 0;
-float prevE = 0;
 
 
-float PWMFullPulseTime = 20.0;
+float delayTime = 20.0;
 float PWMFraction = 0.0;
 float generalSpeedFactor = 0.5;
 int movementDir = 0; //-1 for backwards, +1 for forwards
 
+
+
+
+// put function declarations here:
+void ZFeedb1INTERRUPT();
+void ZFeedbVarvINTERRUPT();
+
+
+void setup() {
+  pinMode(ZDriveF, OUTPUT);
+  pinMode(ZDriveB, OUTPUT);
+  pinMode(lampDebug, OUTPUT);
+  pinMode(ZFeedb1, INPUT);
+  pinMode(ZFeedb2, INPUT);
+  pinMode(ZFeedbVarv, INPUT);
+  pinMode(ZFeedbHitEnd, INPUT);
+
+
+  attachInterrupt(digitalPinToInterrupt(ZFeedb1), ZFeedb1INTERRUPT, RISING);
+  attachInterrupt(digitalPinToInterrupt(ZFeedbVarv), ZFeedbVarvINTERRUPT, RISING);
+
+
+  Serial.begin(9600);
+  while (!Serial); // Wait for serial port to connect (for some boards)
+  sprintf(buffer, "ID:%d", DEVICE_ID);
+  Serial.println(buffer);
+}
 
 
 
@@ -91,6 +100,14 @@ void loop() {
         Serial.println("Unknown command.");
       }
 
+      if(incomingCommand.equalsIgnoreCase("RESET")){
+        missionIndex = 2;
+      } else if(incomingCommand.equalsIgnoreCase("STOP")){
+        missionIndex = 0;
+      } else {
+        missionIndex = 1;
+      }
+
 
       incomingCommand = ""; // Reset buffer
     } else {
@@ -101,49 +118,72 @@ void loop() {
 
 
 
-
-
-  float e = targetLocationNumber - locationNumber;
-  float derivative = (locationNumber - prevLocationNumber)/PWMFullPulseTime;
-  float speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus; //+e/12000;
-
-
-  if(prevLocationNumber != locationNumber){
-    integral = integral + e*PWMFullPulseTime;
-  }
-  if(1000*derivative < 250){
-    if(abs(locationNumber - targetLocationNumber) < 1000){
-      if(locationNumber > targetLocationNumber){
-        antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*PWMFullPulseTime/1000;// * (1+antistuckCurrentPWMBonus);
-      } else{
-        antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*PWMFullPulseTime/1000;// * (1-antistuckCurrentPWMBonus);
+  float speedNDir = 0;
+  if(missionIndex == 1){
+    float e = targetLocationNumber - locationNumber;
+    float derivative = (locationNumber - prevLocationNumber)/delayTime;
+    speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+  
+  
+    if(prevLocationNumber != locationNumber){
+      integral = integral + e*delayTime;
+    }
+    if(1000*derivative < 250){
+      if(abs(locationNumber - targetLocationNumber) < 1000){
+        if(locationNumber > targetLocationNumber){
+          antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+        } else{
+          antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+        }
       }
     }
-  }
-  prevLocationNumber = locationNumber;
- 
-  if(locationNumber > targetLocationNumber - 5 && speedNDir > 0){
-    speedNDir = 0;
-    integral = 0;
-    antistuckCurrentPWMBonus = 0;
-//    I = antiStuck_I;
-  }
-  if(locationNumber < targetLocationNumber + 5 && speedNDir < 0){
-    speedNDir = 0;
-    integral = 0;
-    antistuckCurrentPWMBonus = 0;
-//    I = antiStuck_I;
-  }
-  if(abs(locationNumber - targetLocationNumber) < 5 && locationNumber - prevLocationNumber == 0){
-    if(targetLocationNumber != 1000){
-      targetLocationNumber = 1000;
-    } else{
-      targetLocationNumber = 9000;
+    prevLocationNumber = locationNumber;
+   
+    if(locationNumber > targetLocationNumber - 5 && speedNDir > 0){
+      speedNDir = 0;
+      integral = 0;
+      antistuckCurrentPWMBonus = 0;
     }
+    if(locationNumber < targetLocationNumber + 5 && speedNDir < 0){
+      speedNDir = 0;
+      integral = 0;
+      antistuckCurrentPWMBonus = 0;
+    }
+    if(abs(locationNumber - targetLocationNumber) < 5 && locationNumber - prevLocationNumber == 0){
+      if(targetLocationNumber != 1000){
+        targetLocationNumber = 1000;
+      } else{
+        targetLocationNumber = 9000;
+      }
+    }
+    if(abs(locationNumber - targetLocationNumber) > 2000){
+      antistuckCurrentPWMBonus = 0;
+    }
+
+  
+  } else if(missionIndex == 2){
+    if(digitalRead(ZFeedbHitEnd)){
+      missionIndex = 0;
+      locationNumber = 0;
+      varvNumber = 0;
+      integral = 0;
+      antistuckCurrentPWMBonus = 0;
+    }
+    speedNDir = -0.4;
   }
-  if(abs(locationNumber - targetLocationNumber) > 2000){
-    //I = normal_I;
-    antistuckCurrentPWMBonus = 0;
+
+
+ 
+
+  Serial.print(varvNumber);
+  Serial.print(" ");
+  Serial.print(varvNumber2);
+  Serial.print(" ");
+  Serial.println(locationNumber);
+
+  analogWrite(lampDebug, 0.11*varvNumber*1000*0.7);
+  if(locationNumber + 5 > targetLocationNumber && locationNumber - 5 < targetLocationNumber){
+    analogWrite(lampDebug, 0);
   }
 
 
@@ -151,9 +191,6 @@ void loop() {
   if(PWMFraction > 1) PWMFraction = 1;
   movementDir = 1;
   if(speedNDir < 0.0) movementDir = -1;
-
-
-
 
   if(movementDir == 1){
     analogWrite(ZDriveF, 255);
@@ -165,22 +202,7 @@ void loop() {
     analogWrite(ZDriveF, 0);
     analogWrite(ZDriveB, 0);
   }
- 
-
-
-  analogWrite(lampDebug, 0.11*locationNumber*0.7);
-  if(locationNumber + 5 > targetLocationNumber && locationNumber - 5 < targetLocationNumber){
-    analogWrite(lampDebug, 0);
-  }
-
-  
-  Serial.print(varvNumber);
-  Serial.print(" ");
-  Serial.println(locationNumber);
-
-  
-  //analogWrite(lampDebug, 0.077*locationNumber*255);
-  delay(PWMFullPulseTime);
+  delay(delayTime);
 }
 
 
@@ -199,29 +221,13 @@ void ZFeedb1INTERRUPT(){
 void ZFeedbVarvINTERRUPT(){
   
   varvNumber += 1;
-  /*
+  
   if(digitalRead(ZFeedb2) == HIGH){
-    varvNumber += 1;
+    varvNumber2 += 1;
   }
   if(digitalRead(ZFeedb2) == LOW){
-    varvNumber -= 1;
-  }*/
+    varvNumber2 -= 1;
+  }
  // locationNumber = 1000.0*round(locationNumber/1000.0);
  // locationNumber = 10*varvNumber;
 }
-
-
-// put function definitions here:
-/*double sin(double x) {
-  int zone = 0;
-  while(x > 1.571){
-    x = x - 3.1415;
-    zone = zone + 1;
-  }
-  double toRet = x - x*x*x/6 + x*x*x*x*x/120 - x*x*x*x*x*x*x/5040;
-  if(zone % 2 == 1) toRet = -toRet;
-  return toRet;
-}*/
-
-
-
