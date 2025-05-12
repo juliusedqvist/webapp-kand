@@ -227,12 +227,12 @@ void ZFeedbVarvINTERRUPT(){
   }
   if(digitalRead(ZFeedb2) == LOW){
     varvNumber2 -= 1;
-  }*/
+  }
   
   Serial.print(varvNumber);
   Serial.print(" : ");
   Serial.print(varvNumber2);
   Serial.print(" : ");
   Serial.println(locationNumber);
-  Serial.print(" : ");
+  Serial.print(" : ");*/
 }
