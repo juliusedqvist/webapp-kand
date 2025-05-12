@@ -173,7 +173,7 @@ void loop() {
  
 
 
-  analogWrite(lampDebug, 0.11*varvNumber2*1000*0.7);
+  analogWrite(lampDebug, 0.11*locationNumber*0.7);
   if(locationNumber + 5 > targetLocationNumber && locationNumber - 5 < targetLocationNumber){
     analogWrite(lampDebug, 0);
   }
@@ -213,7 +213,7 @@ void ZFeedb1INTERRUPT(){
 
 void ZFeedbVarvINTERRUPT(){
   //first, tell if it's valid
-  if(abs(1000*varvNumber - locationNumber) > 300){
+  /*if(abs(1000*varvNumber - locationNumber) > 300){
     if(locationNumber > 1000*varvNumber){
       varvNumber += 1;
     }
@@ -227,7 +227,7 @@ void ZFeedbVarvINTERRUPT(){
   }
   if(digitalRead(ZFeedb2) == LOW){
     varvNumber2 -= 1;
-  }
+  }*/
   
   Serial.print(varvNumber);
   Serial.print(" : ");
