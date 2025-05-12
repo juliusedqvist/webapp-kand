@@ -34,7 +34,7 @@ float varvNumber2 = 0;
 int prevLocationNumber = locationNumber;
 
 
-int targetLocationNumber = 8000;
+int targetLocationNumber = 7875;
 
 
 
@@ -186,15 +186,11 @@ void loop() {
   if(speedNDir < 0.0) movementDir = -1;
 
   if(movementDir == 1){
-  //  analogWrite(ZDriveF, 255); //Driving it and braking simultaneously is was reccomended by data sheet
-   // analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
-    digitalWrite(ZDriveF, HIGH);
-    digitalWrite(ZDriveB, LOW);
+    analogWrite(ZDriveF, 255); //Driving it and braking simultaneously is was reccomended by data sheet
+    analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
   } else if (movementDir == -1){
-  //  analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
-  //  analogWrite(ZDriveB, 255);
-    digitalWrite(ZDriveF, LOW);
-    digitalWrite(ZDriveB, HIGH);
+    analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
+    analogWrite(ZDriveB, 255);
   } else{
     analogWrite(ZDriveF, 0);
     analogWrite(ZDriveB, 0);
