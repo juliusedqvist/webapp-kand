@@ -211,7 +211,7 @@ void ZFeedb1INTERRUPT(){
 }
 
 
-void ZFeedbVarvINTERRUPT(){
+void ZFeedbVarvINTERRUPT(){/*
   //first, tell if it's valid
   if(abs(1000*varvNumber - locationNumber) > 300){
     if(locationNumber > 1000*varvNumber){
@@ -228,8 +228,11 @@ void ZFeedbVarvINTERRUPT(){
   if(digitalRead(ZFeedb2) == LOW){
     varvNumber2 -= 1;
   }
-  
+  */
   locationNumber = 1000.0*round(locationNumber/1000.0);
+  
+  
+  Serial.println(locationNumber);
   
  /* Serial.print(varvNumber);
   Serial.print(" : ");
