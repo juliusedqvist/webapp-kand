@@ -232,6 +232,7 @@ void ZFeedbVarvINTERRUPT(){
   if(digitalRead(ZFeedb2) == LOW){
     varvNumber2 -= 1;
   }
+  Serial.println(locationNumber);
   
   locationNumber = 1000.0*round(locationNumber/1000.0);
   
