@@ -222,10 +222,10 @@ void ZFeedbVarvINTERRUPT(){
     }
   }
     
-  if(digitalRead(ZFeedb2) == HIGH){
+  if(digitalRead(ZFeedb1) == HIGH){
     varvNumber2 += 1;
   }
-  if(digitalRead(ZFeedb2) == LOW){
+  if(digitalRead(ZFeedb1) == LOW){
     varvNumber2 -= 1;
   }
   
