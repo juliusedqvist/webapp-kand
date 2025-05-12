@@ -3,11 +3,10 @@
 
 #define ZDriveF 9
 #define ZDriveB 10
-#define ZFeedb1 2
-#define ZFeedb2 5
-#define ZFeedbVarv 3
-#define ZFeedbHitEnd 2
-//feedBVarv har pin 3. Feedb2 har 5?
+#define ZFeedb1 2 //The motors channel B, I think. It is synchronius with channel Z
+#define ZFeedb2 5 //The motors channel A, I think
+#define ZFeedbVarv 3 //The motors channel Z
+//#define ZFeedbHitEnd 0
 
 
 #define lampDebug 6
@@ -43,8 +42,6 @@ int targetLocationNumber = 8000;
 float P = 0.0004;
 float I = 0.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
-
-
 float D = 0.045; //this is close to the dynamic friction constant, it seems
 float integral = 0;
 
@@ -52,7 +49,7 @@ float integral = 0;
 float delayTime = 20.0;
 float PWMFraction = 0.0;
 float generalSpeedFactor = 0.5;
-int movementDir = 0; //-1 for backwards, +1 for forwards
+int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
 
@@ -69,7 +66,7 @@ void setup() {
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT);
+ // pinMode(ZFeedbHitEnd, INPUT);
 
 
   attachInterrupt(digitalPinToInterrupt(ZFeedb1), ZFeedb1INTERRUPT, RISING);
@@ -162,26 +159,21 @@ void loop() {
 
   
   } else if(missionIndex == 2){
-    if(digitalRead(ZFeedbHitEnd)){
+   /* if(digitalRead(ZFeedbHitEnd)){
       missionIndex = 0;
       locationNumber = 0;
       varvNumber = 0;
       integral = 0;
       antistuckCurrentPWMBonus = 0;
-    }
+    }*/
     speedNDir = -0.4;
   }
 
 
  
 
-  Serial.print(varvNumber);
-  Serial.print(" ");
-  Serial.print(varvNumber2);
-  Serial.print(" ");
-  Serial.println(locationNumber);
 
-  analogWrite(lampDebug, 0.11*varvNumber*1000*0.7);
+  analogWrite(lampDebug, 0.11*varvNumber2*1000*0.7);
   if(locationNumber + 5 > targetLocationNumber && locationNumber - 5 < targetLocationNumber){
     analogWrite(lampDebug, 0);
   }
@@ -189,11 +181,12 @@ void loop() {
 
   PWMFraction = abs(speedNDir);
   if(PWMFraction > 1) PWMFraction = 1;
-  movementDir = 1;
+  movementDir = 0;
+  if(speedNDir > 0.0) movementDir = 1;
   if(speedNDir < 0.0) movementDir = -1;
 
   if(movementDir == 1){
-    analogWrite(ZDriveF, 255);
+    analogWrite(ZDriveF, 255); //Driving it and braking simultaneously is was reccomended by data sheet
     analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
   } else if (movementDir == -1){
     analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
@@ -228,6 +221,12 @@ void ZFeedbVarvINTERRUPT(){
   if(digitalRead(ZFeedb2) == LOW){
     varvNumber2 -= 1;
   }
+  
+  Serial.print(varvNumber);
+  Serial.print(" ");
+  Serial.print(varvNumber2);
+  Serial.print(" ");
+  Serial.println(locationNumber);
  // locationNumber = 1000.0*round(locationNumber/1000.0);
- // locationNumber = 10*varvNumber;
+  locationNumber = 1000*varvNumber2;
 }
