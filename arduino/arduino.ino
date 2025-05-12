@@ -213,7 +213,7 @@ void ZFeedb1INTERRUPT(){
 
 void ZFeedbVarvINTERRUPT(){
   //first, tell if it's valid
-  /*if(abs(1000*varvNumber - locationNumber) > 300){
+  if(abs(1000*varvNumber - locationNumber) > 300){
     if(locationNumber > 1000*varvNumber){
       varvNumber += 1;
     }
@@ -233,5 +233,5 @@ void ZFeedbVarvINTERRUPT(){
   Serial.print(" ");
   Serial.print(varvNumber2);
   Serial.print(" ");
-  Serial.println(locationNumber);*/
+  Serial.println(locationNumber);
 }
