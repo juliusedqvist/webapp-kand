@@ -5,11 +5,11 @@
 #define ZDriveB 10
 #define ZFeedb1 2 //The motors channel B, I think. It is synchronius with channel Z
 #define ZFeedb2 5 //The motors channel A, I think
-#define ZFeedbVarv 3 //The motors channel Z
-//#define ZFeedbHitEnd 0
+#define ZFeedbHitEnd 4
 
+#define ZFeedbVarv 3
 
-#define lampDebug 6
+//#define lampDebug 6
 
 
 #ifndef DEVICE_ID
@@ -28,10 +28,17 @@ int missionIndex = 1;
 
 
 
-float locationNumber = 0; //GOES FROM 0 TO ca 23000
-float varvNumber = 0;
-float varvNumber2 = 0;
+float delayTime = 20.0;
+int delayloops = 0;
+
+volatile int varvNumber = 0;
+volatile float locationNumber = 0; //GOES FROM 0 TO ca 23000
 int prevLocationNumber = locationNumber;
+float longagoPositionOne = locationNumber; //0 to 1.5s ago
+float longagoPositionTwo = locationNumber; //1.5 to 3s ago
+float longagoPositionThree = locationNumber; //3 to 4.5s ago
+int loopsPerLongagoPositionUpdate = 1500/delayTime;
+int counter = 0;
 
 
 int targetLocationNumber = 7875;
@@ -42,16 +49,17 @@ int targetLocationNumber = 7875;
 float P = 0.0004;
 float I = 0.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
-float D = 0.045; //this is close to the dynamic friction constant, it seems
+float D = 0.05;
 float integral = 0;
+float generalSpeedFactor = 0.55;
+
+int forwardsMargin = 25;
+int backwardsMargin = 5;
 
 
-float delayTime = 20.0;
 float PWMFraction = 0.0;
-float generalSpeedFactor = 0.5;
 int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
-int delayloops = 0;
 
 
 // put function declarations here:
@@ -62,12 +70,18 @@ void ZFeedbVarvINTERRUPT();
 void setup() {
   pinMode(ZDriveF, OUTPUT);
   pinMode(ZDriveB, OUTPUT);
-  pinMode(lampDebug, OUTPUT);
+  //pinMode(lampDebug, OUTPUT);
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
- // pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
 
+
+
+  pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
+  pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
+  pinMode(13, OUTPUT); //Permanently high
+  digitalWrite(13, HIGH);
 
   attachInterrupt(digitalPinToInterrupt(ZFeedb1), ZFeedb1INTERRUPT, RISING);
   attachInterrupt(digitalPinToInterrupt(ZFeedbVarv), ZFeedbVarvINTERRUPT, RISING);
@@ -113,7 +127,12 @@ void loop() {
   }
 
 
-
+  counter += 1;
+  if(counter % 75 == 0){
+    longagoPositionThree = longagoPositionTwo;
+    longagoPositionTwo = longagoPositionOne;
+    longagoPositionOne = locationNumber;
+  }
 
   float speedNDir = 0;
   if(delayloops > 0){
@@ -139,38 +158,49 @@ void loop() {
       }
       prevLocationNumber = locationNumber;
      
-      if(locationNumber > targetLocationNumber - 5 && speedNDir > 0){
+      if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
         speedNDir = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
       }
-      if(locationNumber < targetLocationNumber + 5 && speedNDir < 0){
+      if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
         speedNDir = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
       }
-      if(abs(locationNumber - targetLocationNumber) < 5 && locationNumber - prevLocationNumber == 0){
-        if(targetLocationNumber != 1000){
-          targetLocationNumber = 1000;
-        } else{
+      if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
+        if(targetLocationNumber != 7875){
           targetLocationNumber = 7875;
+          //delayloops = 200;
+        } else{
+    //      targetLocationNumber = 1000;
         }
-        delayloops = 200;
+        //missionIndex = 0;
+      }
+      if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 75)){
+  //      targetLocationNumber = 4000;
+      }
+      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
+   //     targetLocationNumber = 7000;
+        //GRAB
+        //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
+        //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
       }
       if(abs(locationNumber - targetLocationNumber) > 2000){
         antistuckCurrentPWMBonus = 0;
       }
-  
-    
+
+
+
     } else if(missionIndex == 2){
-     /* if(digitalRead(ZFeedbHitEnd)){
+      if(!digitalRead(ZFeedbHitEnd)){
         missionIndex = 0;
         locationNumber = 0;
-        varvNumber = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
-      }*/
-      speedNDir = -0.4;
+      } else{
+        speedNDir = -0.4;
+      }
     }
   
   }
@@ -179,10 +209,10 @@ void loop() {
  
 
 
-  analogWrite(lampDebug, 0.11*locationNumber*0.7);
+  /*analogWrite(lampDebug, 0.11*locationNumber*0.7);
   if(locationNumber + 5 > targetLocationNumber && locationNumber - 5 < targetLocationNumber){
     analogWrite(lampDebug, 0);
-  }
+  }*/
 
 
   PWMFraction = abs(speedNDir);
@@ -192,7 +222,7 @@ void loop() {
   if(speedNDir < 0.0) movementDir = -1;
 
   if(movementDir == 1){
-    analogWrite(ZDriveF, 255); //Driving it and braking simultaneously is was reccomended by data sheet
+    analogWrite(ZDriveF, 255); //Driving and braking simultaneously was reccomended by the data sheet for controlling it via PWM
     analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
   } else if (movementDir == -1){
     analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
@@ -201,9 +231,6 @@ void loop() {
     analogWrite(ZDriveF, 0);
     analogWrite(ZDriveB, 0);
   }
-
-  Serial.println(locationNumber);
-
   delay(delayTime);
 }
 
@@ -213,35 +240,17 @@ void loop() {
 void ZFeedb1INTERRUPT(){
   if(digitalRead(ZFeedb2) == HIGH){
     locationNumber += 1;
-  }
-  if(digitalRead(ZFeedb2) == LOW){
+  } else{
     locationNumber -= 1;
   }
 }
 
-
 void ZFeedbVarvINTERRUPT(){
-  //first, tell if it's valid
-  /*if(abs(1000*varvNumber - locationNumber) > 300){
-    if(locationNumber > 1000*varvNumber){
-      varvNumber += 1;
-    }
-    if(locationNumber < 1000*varvNumber){
-      varvNumber -= 1;
-    }
-  }
-    
   if(digitalRead(ZFeedb2) == HIGH){
-    varvNumber2 += 1;
+    varvNumber += 1;
+  } else{
+    varvNumber -= 1;
   }
-  if(digitalRead(ZFeedb2) == LOW){
-    varvNumber2 -= 1;
-  }*/
-  
- /* Serial.print(varvNumber);
-  Serial.print(" : ");
-  Serial.print(varvNumber2);
-  Serial.print(" : ");
+
   Serial.println(locationNumber);
-  Serial.print(" : ");*/
 }
