@@ -62,25 +62,24 @@
     </div>
     <!-- Command and action panels -->
     <div class="panel-stack">
-        <div class="next-action-panel">
-          <div class="panel-header">Commands</div>
-          <div class="btn-display">
-            <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP')">STOP</button>
-            <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET')">RESET</button>
-            <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME')">RESUME</button>
-            <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN NEXT</button>
-          </div>
+      <div class="next-action-panel">
+        <div class="panel-header">Commands</div>
+        <div class="btn-display">
+          <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP')">STOP</button>
+          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET')">RESET</button>
+          <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME')">RESUME</button>
+          <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN NEXT</button>
         </div>
+      </div>
+      <div class="next-action-panel">
+        <div class="panel-header">Next action</div>
+        <div class="action-display">{{ nextAction || '—' }}</div>
+        <div class="btn-display">
+          <button class="panel-btn" @click="clearNextAction">CLEAR</button>
+        </div>
+      </div>
+      
 
-        <div class="next-action-panel">
-          <div class="panel-header">Next action</div>
-          <div class="action-display">{{ nextAction || '—' }}</div>
-          <div class="btn-display">
-            <button class="panel-btn" @click="clearNextAction">CLEAR</button>
-            <button class="panel-btn" @click="handleChamberClick('AUTO A')">AUTO A</button>
-            <button class="panel-btn" @click="handleChamberClick('AUTO B')">AUTO B</button>
-          </div>
-        </div>
       </div>
     
   </div>
@@ -91,7 +90,20 @@ import { ref, watch, nextTick } from 'vue'
 import axios from 'axios';
 
 const logs = ref([])
+const storedLogs = localStorage.getItem('logs')
+if (storedLogs) {
+  try {
+    logs.value = JSON.parse(storedLogs)
+  } catch (e) {
+    console.warn('Could not parse stored logs:', e)
+    logs.value = []
+  }
+}
+
+
 const logBox = ref(null)
+const maxLogEntries = 2000
+
 
 const nextAction = ref(null)
 const selectedChambers = ref([])
@@ -148,14 +160,26 @@ function log(message, type = 'info') {
   const now = new Date()
   const time = `${now.toLocaleDateString("sv-SE")} ${now.toLocaleTimeString("sv-SE")}`
   logs.value.push({ message: `[${time}] ${message}`, type })
+
+  // Trim if over max
+  if (logs.value.length > maxLogEntries) {
+    logs.value.splice(0, logs.value.length - maxLogEntries)
+  }
+
+  // Persist
+  localStorage.setItem('logs', JSON.stringify(logs.value))
+
   console.log(`[${type.toUpperCase()}] ${message}`)
 }
+
 
 function confirmClearLog() {
   if (confirm("Are you sure you want to clear the log?")) {
     logs.value = []
+    localStorage.removeItem('logs')
   }
 }
+
 
 watch(
   logs,
@@ -263,7 +287,7 @@ watch(
 
 .panel-stack {
   display: flex;
-  padding-top: 2vw;
+  padding-top: 7vw;
   flex-direction: column;
   gap: 2vw; 
   position: relative;
