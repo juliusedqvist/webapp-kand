@@ -124,17 +124,57 @@ function clearNextAction() {
 }
 
 async function runNextAction() {
+  let fromLocation = null
+  let toLocation = null
+
   const tempActionValue = nextAction.value
   clearNextAction()
   if (tempActionValue) {
     log(`Running: ${tempActionValue}`, 'info');
-
-
+    // console.log("Command:")
+    // console.log(tempActionValue)
+    const commandArray = tempActionValue.split(" ");
+    if (commandArray.length > 1) {
+      fromLocation = commandArray[0]
+      toLocation = commandArray[commandArray.length - 1]
+      // console.log(fromLocation)
+      // console.log(toLocation)
+    }
+    else {
+      fromLocation = commandArray[0]
+      // console.log(fromLocation)
+      // console.log(toLocation)
+    }
+    
+      // if only pickup from B12
+      // "B12_pickup"
+      // if only leave in B12
+      // "B12_leave"
     try {
-      const res = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: tempActionValue
+      if (fromLocation == toLocation) {
+        // console.log("Same location")
+        console.log(toLocation + "_leave")
+        const res = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: toLocation + "_leave"
+        });
+      }
+      else if (toLocation == null) {
+        // console.log("toloc == null")
+        console.log(fromLocation + "_pickup")
+        const res = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: fromLocation + "_pickup"
+        });
+      }
+      else {
+        console.log(fromLocation + "_pickup")
+        const res1 = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: fromLocation + "_pickup"
       });
-
+        console.log(toLocation + "_leave")
+        const res2 = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: toLocation + "_leave"
+      });
+      }
     } catch (err) {
       const msg = err.response?.data?.error || err.message || 'Unknown error';
     }
