@@ -38,8 +38,6 @@ long longagoPositionThree = locationNumber; //3 to 4.5s ago
 int loopsPerLongagoPositionUpdate = 1500/delayTime;
 int counter = 0;
 
-int loopsStandingStill = 0;
-
 long targetLocationNumber = 35000; //HUGE 
 
 
@@ -131,11 +129,6 @@ void loop() {
     longagoPositionThree = longagoPositionTwo;
     longagoPositionTwo = longagoPositionOne;
     longagoPositionOne = locationNumber;
-  }
-
-  loopsStandingStill += 1;
-  if(locationNumber == prevLocationNumber){
-    loopsStandingStill = 0;
   }
 
   float speedNDir = 0;

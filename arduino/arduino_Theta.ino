@@ -49,9 +49,6 @@ int loopsPerLongagoPositionUpdate = 1500/delayTime;
 int counter = 0;
 
 
-int loopsStandingStill = 0;
-
-
 long targetLocationNumber = 26800;
 
 
@@ -168,12 +165,6 @@ void loop() {
     longagoPositionThree = longagoPositionTwo;
     longagoPositionTwo = longagoPositionOne;
     longagoPositionOne = locationNumber;
-  }
-
-
-  loopsStandingStill += 1;
-  if(locationNumber == prevLocationNumber){
-    loopsStandingStill = 0;
   }
 
 
