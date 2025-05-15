@@ -124,57 +124,38 @@ function clearNextAction() {
 }
 
 async function runNextAction() {
-  let fromLocation = null
-  let toLocation = null
+  const tempActionValue = nextAction.value;
+  clearNextAction();
 
-  const tempActionValue = nextAction.value
-  clearNextAction()
-  if (tempActionValue) {
-    log(`Running: ${tempActionValue}`, 'info');
-    const commandArray = tempActionValue.split(" ");
-    if (commandArray.length > 1) {
-      fromLocation = commandArray[0]
-      toLocation = commandArray[commandArray.length - 1]
-    }
-    else {
-      fromLocation = commandArray[0]
-    }
-    
-      // if only pickup from B12
-      // "B12_pickup"
-      // if only leave in B12
-      // "B12_leave"
-    try {
-      if (fromLocation == toLocation) {
-        console.log(toLocation + "_leave")
-        const res = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: toLocation + "_leave"
-        });
-      }
-      else if (toLocation == null) {
-        console.log(fromLocation + "_pickup")
-        const res = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: fromLocation + "_pickup"
-        });
-      }
-      else {
-        console.log(fromLocation + "_pickup")
-        const res1 = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: fromLocation + "_pickup"
-      });
-        console.log(toLocation + "_leave")
-        const res2 = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: toLocation + "_leave"
-      });
-      }
-    } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Unknown error';
-    }
+  if (!tempActionValue) return;
 
-    
+  log(`Running: ${tempActionValue}`, 'info');
+
+  const commandArray = tempActionValue.split(" ");
+  const fromLocation = commandArray[0];
+  const toLocation = commandArray.length > 1 ? commandArray[commandArray.length - 1] : null;
+
+  try {
+    if (fromLocation === toLocation) {
+      await sendCommand(`${toLocation}_leave`);
+    } else if (!toLocation) {
+      await sendCommand(`${fromLocation}_pickup`);
+    } else {
+      await sendCommand(`${fromLocation}_pickup`);
+      await sendCommand(`${toLocation}_leave`);
+    }
+  } catch (err) {
+    const msg = err.response?.data?.error || err.message || 'Unknown error';
+    console.error("Command error:", msg);
   }
-
 }
+
+// Reusable helper for sending commands
+async function sendCommand(command) {
+  console.log("Sending command:", command);
+  await axios.post('http://localhost:3000/api/arduino/command', { command });
+}
+
 
 async function logCommand(command) {
   log(command, 'info')
