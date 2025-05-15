@@ -71,7 +71,7 @@ void setup() {
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
+  pinMode(ZFeedbHitEnd, INPUT);
   pinMode(lockPin, OUTPUT);
 
 
