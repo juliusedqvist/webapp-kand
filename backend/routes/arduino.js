@@ -25,7 +25,7 @@ router.post('/command', (req, res) => {
     return res.status(400).json({ error: 'Command must be a non-empty string' });
   }
 
-  sendToArduino(command);
+  sendToArduino(10000, 1);
   res.json({ status: 'success', sent: command });
 });
 

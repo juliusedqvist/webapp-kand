@@ -38,22 +38,24 @@ for (const path of candidates) {
 
 // Exported function: just writes to the existing port
 
-function sendToArduino(command) {
-  const port = idToPort[command];
+
+function sendToArduino(id, command) {
+  const port = idToPort[id];
 
   if (!port || !port.writable) {
-    console.error(`No writable port for ID ${command}`);
+    console.error(`No writable port for ID ${id}`);
     return;
   }
 
   port.write(command + '\n', (err) => {
     if (err) {
-      console.error('Error writing to Arduino:', err.message);
+      console.error(`Error writing to Arduino ID ${id}:`, err.message);
     } else {
-      console.log(`Command sent to Arduino ID ${command}:`, command);
+      console.log(`Command sent to Arduino ID ${id}:`, command);
     }
   });
 }
+
 
 
 module.exports = {
