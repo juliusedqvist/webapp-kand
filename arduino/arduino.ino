@@ -231,20 +231,22 @@ void loop() {
   movementDir = 0;
   if(speedNDir > 0.0) movementDir = 1;
   if(speedNDir < 0.0) movementDir = -1;
-
+/*
   if(movementDir == 1){
     analogWrite(ZDriveF, 255); //Driving and braking simultaneously was reccomended by the data sheet when controlling it via PWM
     analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
   } else if (movementDir == -1){
     analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
     analogWrite(ZDriveB, 255);
-  } else{
+  } else{*/
     analogWrite(ZDriveF, 0);
     analogWrite(ZDriveB, 0);
-  }
-  if(missionIndex != 2 || delayloops != 0){
+//  }
+  //if(missionIndex != 2 || delayloops != 0){
     delay(delayTime);
-  }
+  //}
+
+  Serial.println(digitalRead(ZFeedbHitEnd));
 }
 
 
