@@ -101,18 +101,14 @@ void loop() {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
 
 
-      if (incomingCommand.equalsIgnoreCase("TOGGLE")) {
-        Serial.println("Oi, whot exactly u want me to toggle?");
-      } else {
-        Serial.println("Unknown command.");
-      }
-
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
-      } else {
+      } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = 1;
+      } else {
+        targetLocationNumber = atoi(incomingCommand.c_str());
       }
 
 
@@ -120,7 +116,6 @@ void loop() {
     } else {
       incomingCommand += received;
     }
-    Serial.println("test\n");
   }
 
 
