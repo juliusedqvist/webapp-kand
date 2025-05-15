@@ -41,6 +41,7 @@ void loop() {
     } else {
       incomingCommand += received;
     }
+    Serial.println("test\n");
   }
 }
 
