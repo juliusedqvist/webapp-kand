@@ -6,7 +6,7 @@
 #define ZFeedb1 2 //The motors channel B, I think. It is synchronius with channel Z
 #define ZFeedb2 5 //The motors channel A, I think
 #define ZFeedbVarv 3 //The motors channel Z
-#define ZFeedbHitEnd 4
+#define ZFeedbHitEnd A5
 #define lockPin 8
 
 
@@ -208,7 +208,7 @@ void loop() {
 
       digitalWrite(lockPin, HIGH); //Turn the lock OFF
 
-      if(digitalRead(ZFeedbHitEnd) == HIGH){ //1023 is 5V
+      if(analogRead(ZFeedbHitEnd) > 100){ //1023 is 5V, signalen är på ca 1V
         missionIndex = 1;
         locationNumber = 0;
         integral = 0;
@@ -246,7 +246,7 @@ void loop() {
     delay(delayTime);
   //}
 
-  Serial.println(digitalRead(ZFeedbHitEnd));
+  Serial.println(analogRead(ZFeedbHitEnd));
 }
 
 
