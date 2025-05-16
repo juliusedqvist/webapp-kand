@@ -4,7 +4,7 @@ const router = express.Router();
 const { sendToArduino } = require('../services/arduinoController');
 
 const position_reference = {
-  B1_pickup: [10000, 5000],
+  B1_pickup: [[10000, 1], [5000, 0]],
   RESET: "RESET"
 }
 
@@ -22,7 +22,7 @@ router.post('/command', async (req, res) => {
     if (Array.isArray(commands)) {
       for (const cmd of commands) {
         console.log(cmd)
-        await sendToArduino(1, cmd);
+        await sendToArduino(cmd[1], cmd[0]);
       }
     } else if (typeof commands === 'string') {
       await sendToArduino(1, commands);
