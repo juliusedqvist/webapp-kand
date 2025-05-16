@@ -4,7 +4,7 @@ const router = express.Router();
 const { sendToArduino } = require('../services/arduinoController');
 
 const position_reference = {
-  B1_pickup: [10000, 100, 100],
+  B1_pickup: [10000, 20000, 5000],
   RESET: "RESET"
 }
 
