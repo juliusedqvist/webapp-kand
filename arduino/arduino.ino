@@ -124,9 +124,10 @@ void loop() {
     char received = Serial.read();
 
 
-    missionIndex = 1;
+   // missionIndex = 1;
     targetLocationNumber = targetLocationNumber + 1000;
 
+    Serial.println(incomingCommand);
     // If newline, process command
     if (received == '\n') {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
