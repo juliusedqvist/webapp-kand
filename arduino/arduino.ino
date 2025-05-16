@@ -19,18 +19,14 @@
 #endif
 
 
-
-
 char buffer[64];
 String incomingCommand = "";
-
-
 
 
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int missionIndex = 2;
+int missionIndex = 0;
 
 
 
@@ -41,8 +37,7 @@ float delayTime = 20.0;
 int delayloops = 0;
 
 
-//volatile int varvNumber = 0;
-volatile long locationNumber = 0; //goes from 0 to something HUGE (>100k?) //ca 225 steps per millimeter
+volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
 long prevLocationNumber = locationNumber;
 long longagoPositionOne = locationNumber; //0 to 1.5s ago
 long longagoPositionTwo = locationNumber; //1.5 to 3s ago
@@ -51,10 +46,11 @@ int loopsPerLongagoPositionUpdate = 1500/delayTime;
 int counter = 0;
 
 
-int loopsStandingStill = 0;
+long targetLocationNumber = 0;
 
 
-long targetLocationNumber = 65000; //HUGE
+
+
 
 
 
@@ -62,13 +58,11 @@ long targetLocationNumber = 65000; //HUGE
 
 
 float P = 0.0003;
-float I = 0.000000005;//.00000025;
+float I = 0;//.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
-float D = 0;//.085;
+float D = 0.085;
 float integral = 0;
-float generalSpeedFactor = 0.65; //0.45
-
-
+float generalSpeedFactor = 0.65;
 
 
 int forwardsMargin = 225;
@@ -97,7 +91,6 @@ void setup() {
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
   pinMode(ZFeedbHitEnd, INPUT);
-  pinMode(lockPin, OUTPUT);
 
 
 
@@ -131,31 +124,20 @@ void loop() {
     char received = Serial.read();
 
 
-
-
     // If newline, process command
     if (received == '\n') {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
-
-
-
-
-      if (incomingCommand.equalsIgnoreCase("TOGGLE")) {
-        Serial.println("Oi, whot exactly u want me to toggle?");
-      } else {
-        Serial.println("Unknown command.");
-      }
 
 
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
-      } else {
+      } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = 1;
+      } else {
+        targetLocationNumber = atoi(incomingCommand.c_str());
       }
-
-
 
 
       incomingCommand = ""; // Reset buffer
@@ -175,37 +157,26 @@ void loop() {
   }
 
 
-  loopsStandingStill += 1;
-  if(locationNumber == prevLocationNumber){
-    loopsStandingStill = 0;
-  }
-
-
   float speedNDir = 0;
   if(delayloops > 0){
     delayloops -= 1;
-    digitalWrite(lockPin, LOW);
   } else{
-    if(missionIndex == 0){
-      digitalWrite(lockPin, LOW);
-    }
     if(missionIndex == 1){
-      digitalWrite(lockPin, HIGH); //Turn the lock OFF
       float e = targetLocationNumber - locationNumber;
       float derivative = (locationNumber - prevLocationNumber)/delayTime;
       speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
    
    
-      if(1000*derivative < 2500){ //less than about 1cm/second
-        if(abs(locationNumber - targetLocationNumber) < 6000){
+      if(1000*derivative < 250){
+        if(abs(locationNumber - targetLocationNumber) < 1000){
           if(locationNumber > targetLocationNumber){
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.15*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
           } else{
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.15*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
           }
         }
       }
-      if(abs(locationNumber - targetLocationNumber) > 8000){
+      if(abs(locationNumber - targetLocationNumber) > 2000){
         antistuckCurrentPWMBonus = 0;
       }
      
@@ -221,27 +192,28 @@ void loop() {
       }
 
 
-      //If we are standing (somewhat) still and at the correct location:
-      if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && abs(locationNumber - longagoPositionTwo) < 75)){
+      //If we are standing still and at the correct location:
+      if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
         missionIndex = 2;
-        delayloops = 0;
+        delayloops = 50;
       }
      
       //If we are stuck against something but very close to target location, react quickly:
- /*     if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 250)){
+      if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
         missionIndex = 2;
         delayloops = 50;
       }
      
       //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1500)){
+      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
         missionIndex = 2;
         delayloops = 50;
         //GRAB
         //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
         //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
       }
-*/
+
+
 
 
      
@@ -249,27 +221,18 @@ void loop() {
         integral = integral + e*delayTime;
       }
       prevLocationNumber = locationNumber;
+
+
     } else if(missionIndex == 2){
-
-
-
-
-      digitalWrite(lockPin, HIGH); //Turn the lock OFF
-
-
-      if(analogRead(ZFeedbHitEnd) > 150){ //high-signalen är på ca 250, och low-signalen är på ca 25
+      if(digitalRead(ZFeedbHitEnd) == HIGH){
         missionIndex = 1;
         locationNumber = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
         delayloops = 50;
       } else{
-        speedNDir = -0.45;
+        speedNDir = -0.6;
       }
-
-
-
-
     }
  
   }
@@ -311,9 +274,9 @@ void loop() {
 
 void ZFeedb1INTERRUPT(){
   if(digitalRead(ZFeedb2) == HIGH){
-    locationNumber -= 1;
-  } else{
     locationNumber += 1;
+  } else{
+    locationNumber -= 1;
   }
 }
 
@@ -321,4 +284,5 @@ void ZFeedb1INTERRUPT(){
 void ZFeedbVarvINTERRUPT(){
   locationNumber = round(locationNumber/1000.0)*1000.0;
 }
+
 
