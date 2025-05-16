@@ -29,7 +29,7 @@ String incomingCommand = "";
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int missionIndex = 1;
+int missionIndex = 0;
 
 
 
@@ -49,14 +49,14 @@ int loopsPerLongagoPositionUpdate = 1500/delayTime;
 int counter = 0;
 
 
-long targetLocationNumber = 1000;
+long targetLocationNumber = 0;
 
 
 
 
 
 
-float P = 0.00035;
+float P = 0.0003;
 float I = 0;//.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
 float D = 0.085;
@@ -124,15 +124,13 @@ void loop() {
     char received = Serial.read();
 
 
-   // missionIndex = 1;
-    targetLocationNumber = targetLocationNumber + 1000;
-
-    Serial.println(incomingCommand);
     // If newline, process command
     if (received == '\n') {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
 
 
+		Serial.print("Command recieved: ");
+		Serial.println(incomingCommand);
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
@@ -140,6 +138,7 @@ void loop() {
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = 1;
       } else {
+        missionIndex = 1;
         targetLocationNumber = atoi(incomingCommand.c_str());
       }
 
@@ -198,20 +197,17 @@ void loop() {
 
       //If we are standing still and at the correct location:
       if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
-        missionIndex = 2;
-        delayloops = 50;
+        missionIndex = 0;
       }
      
       //If we are stuck against something but very close to target location, react quickly:
       if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
-        missionIndex = 2;
-        delayloops = 50;
+        missionIndex = 0;
       }
      
       //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
       if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
-        missionIndex = 2;
-        delayloops = 50;
+        missionIndex = 0;
         //GRAB
         //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
         //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
