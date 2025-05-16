@@ -273,7 +273,7 @@ void loop() {
 
 
 void ZFeedb1INTERRUPT(){
-  if(digitalRead(ZFeedb2) == LOW){
+  if(digitalRead(ZFeedb2) == HIGH){
     locationNumber += 1;
   } else{
     locationNumber -= 1;
