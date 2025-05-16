@@ -37,15 +37,13 @@ int missionIndex = 0;
 
 
 float delayTime = 20.0;
-int delayloops = 0;
-
 
 volatile long locationNumber = 0; //Goes from 0 to like, 40-50k or smth
 long prevLocationNumber = locationNumber;
-long longagoPositionOne = locationNumber; //0 to 1.5s ago
-long longagoPositionTwo = locationNumber; //1.5 to 3s ago
-long longagoPositionThree = locationNumber; //3 to 4.5s ago
-int loopsPerLongagoPositionUpdate = 1500/delayTime;
+long longagoPositionOne = locationNumber; //0 to 2s ago
+long longagoPositionTwo = locationNumber; //2 to 4s ago
+long longagoPositionThree = locationNumber; //4 to 6s ago
+int loopsPerLongagoPositionUpdate = 2000/delayTime;
 int counter = 0;
 
 
@@ -151,7 +149,7 @@ void loop() {
 
 
   counter += 1;
-  if(counter % 125 == 0){
+  if(counter % loopsPerLongagoPositionUpdate == 0){
     longagoPositionThree = longagoPositionTwo;
     longagoPositionTwo = longagoPositionOne;
     longagoPositionOne = locationNumber;
@@ -159,89 +157,82 @@ void loop() {
 
 
   float speedNDir = 0;
-  if(delayloops > 0){
-    delayloops -= 1;
-  } else{
-    if(missionIndex == 1){
-      float e = targetLocationNumber - locationNumber;
-      float derivative = (locationNumber - prevLocationNumber)/delayTime;
-      speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
-   
-   
-      if(1000*derivative < 250){
-        if(abs(locationNumber - targetLocationNumber) < 1000){
-          if(locationNumber > targetLocationNumber){
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
-          } else{
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
-          }
-        }
-      }
-      if(abs(locationNumber - targetLocationNumber) > 2000){
-        antistuckCurrentPWMBonus = 0;
-      }
-     
-      if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
-        speedNDir = 0;
-        integral = 0;
-        antistuckCurrentPWMBonus = 0;
-      }
-      if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
-        speedNDir = 0;
-        integral = 0;
-        antistuckCurrentPWMBonus = 0;
-      }
+if(missionIndex == 1){
+  float e = targetLocationNumber - locationNumber;
+  float derivative = (locationNumber - prevLocationNumber)/delayTime;
+  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
-      //If we are standing still and at the correct location:
-      if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
-        missionIndex = 0;
-		Serial.println("done");
-      }
-     
-      //If we are stuck against something but very close to target location, react quickly:
-	  //This makes little sense for theta
-      /*if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
-        missionIndex = 0;
-		Serial.println("done");
-      }*/
-     
-      //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-      if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
-        missionIndex = 0;
-		Serial.println("fuck");
-        //GRAB
-        //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
-        //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
-      }
-
-
-
-
-     
-      if(prevLocationNumber != locationNumber){
-        integral = integral + e*delayTime;
-      }
-      prevLocationNumber = locationNumber;
-
-
-    } else if(missionIndex == 2){
-      if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
-        missionIndex = 1;
-        locationNumber = 0;
-        integral = 0;
-        antistuckCurrentPWMBonus = 0;
-        delayloops = 50;
-      } else{
-        speedNDir = -1;
-      }
-    }
+  if(1000*derivative < 250){
+	if(abs(locationNumber - targetLocationNumber) < 1000){
+	  if(locationNumber > targetLocationNumber){
+		antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+	  } else{
+		antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+	  }
+	}
+  }
+  if(abs(locationNumber - targetLocationNumber) > 2000){
+	antistuckCurrentPWMBonus = 0;
+  }
  
+  if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
+	speedNDir = 0;
+	integral = 0;
+	antistuckCurrentPWMBonus = 0;
+  }
+  if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
+	speedNDir = 0;
+	integral = 0;
+	antistuckCurrentPWMBonus = 0;
   }
 
 
+  //If we are standing still and at the correct location:
+  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
+	missionIndex = 0;
+	Serial.println("done");
+  }
  
+  //If we are stuck against something but very close to target location, react quickly:
+  //This makes little sense for theta
+  /*if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
+	missionIndex = 0;
+	Serial.println("done");
+  }*/
+ 
+  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
+  if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
+	missionIndex = 0;
+	Serial.println("fuck");
+	//GRAB
+	//REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
+	//REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
+  }
 
+
+
+
+ 
+  if(prevLocationNumber != locationNumber){
+	integral = integral + e*delayTime;
+  }
+  prevLocationNumber = locationNumber;
+
+
+} else if(missionIndex == 2){
+  if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
+	missionIndex = 0;
+	locationNumber = 0;
+	integral = 0;
+	antistuckCurrentPWMBonus = 0;
+	longagoPositionThree = 0;
+	longagoPositionTwo = 0;
+	longagoPositionOne = 0;
+  } else{
+	speedNDir = -0.7;
+  }
+}
 
 
 
@@ -262,7 +253,7 @@ void loop() {
     analogWrite(ZDriveF, 0);
     analogWrite(ZDriveB, 0);
   }
-  if(missionIndex != 2 || delayloops != 0){
+  if(missionIndex == 1){
     delay(delayTime);
   }
 }
