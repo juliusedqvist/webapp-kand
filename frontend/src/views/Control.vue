@@ -138,11 +138,14 @@ async function runNextAction() {
   try {
     if (fromLocation === toLocation) {
       await sendCommand(`${toLocation}_leave`);
+      await sendCommand(`RESET`);
     } else if (!toLocation) {
       await sendCommand(`${fromLocation}_pickup`);
+      await sendCommand(`RESET`);
     } else {
       await sendCommand(`${fromLocation}_pickup`);
       await sendCommand(`${toLocation}_leave`);
+      await sendCommand(`RESET`);
     }
   } catch (err) {
     const msg = err.response?.data?.error || err.message || 'Unknown error';
