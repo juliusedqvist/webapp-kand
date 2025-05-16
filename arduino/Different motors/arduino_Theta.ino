@@ -29,7 +29,7 @@ String incomingCommand = "";
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int missionIndex = 1;
+int missionIndex = 0;
 
 
 
@@ -49,7 +49,7 @@ int loopsPerLongagoPositionUpdate = 1500/delayTime;
 int counter = 0;
 
 
-long targetLocationNumber = 26800;
+long targetLocationNumber = 0;
 
 
 
