@@ -4,7 +4,7 @@ const router = express.Router();
 const { sendToArduino } = require('../services/arduinoController');
 
 const position_reference = {
-  B1_pickup: 10000,
+  B1_pickup: [10000, 100, 100],
   RESET: "RESET"
 }
 
@@ -16,8 +16,18 @@ router.post('/command', async (req, res) => {
   }
 
   try {
-    console.log(position_reference[command]);
-    const response = await sendToArduino(1, position_reference[command]);
+    const commands = position_reference[command];
+
+    if (Array.isArray(commands)) {
+      for (const cmd of commands) {
+        console.log(cmd)
+        await sendToArduino(1, cmd);
+      }
+    } else if (typeof commands === 'string') {
+  await sendToArduino(1, commands);
+} else {
+  throw new Error(`Invalid command format for key: ${command}`);
+}
     res.json({ status: 'success', sent: command, arduinoResponse: response });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send command', details: err.message });
