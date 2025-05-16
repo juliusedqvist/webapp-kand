@@ -18,6 +18,7 @@ router.post('/command', async (req, res) => {
   try {
     const commands = position_reference[command];
 
+    console.log(commands)
     if (Array.isArray(commands)) {
       for (const cmd of commands) {
         console.log(cmd)
@@ -30,7 +31,8 @@ router.post('/command', async (req, res) => {
     }
     res.json({ status: 'success', sent: command, arduinoResponse: response });
   } catch (err) {
-    res.status(500).json({ error: 'alskjdfFailed to send command', details: err.message });
+    console.log(err)
+    res.status(500).json({ error: 'Failed to send command', details: err.message });
   }
 });
 
