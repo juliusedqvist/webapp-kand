@@ -17,7 +17,7 @@ router.post('/command', async (req, res) => {
 
   try {
     console.log(position_reference[command]);
-    const response = await sendToArduino(0, position_reference[command]);
+    const response = await sendToArduino(1, position_reference[command]);
     res.json({ status: 'success', sent: command, arduinoResponse: response });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send command', details: err.message });
