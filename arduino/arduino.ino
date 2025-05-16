@@ -9,7 +9,6 @@
 #define ZFeedb2 5 //The motors channel A, I think
 #define ZFeedbVarv 3 //The motors channel Z
 #define ZFeedbHitEnd A5
-#define lockPin 8
 
 
 
@@ -19,14 +18,18 @@
 #endif
 
 
+
+
 char buffer[64];
 String incomingCommand = "";
+
+
 
 
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int missionIndex = 0;
+int missionIndex = 1;
 
 
 
@@ -37,7 +40,7 @@ float delayTime = 20.0;
 int delayloops = 0;
 
 
-volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
+volatile long locationNumber = 0; //Goes from 0 to like, 40-50k or smth
 long prevLocationNumber = locationNumber;
 long longagoPositionOne = locationNumber; //0 to 1.5s ago
 long longagoPositionTwo = locationNumber; //1.5 to 3s ago
@@ -46,27 +49,23 @@ int loopsPerLongagoPositionUpdate = 1500/delayTime;
 int counter = 0;
 
 
-long targetLocationNumber = 0;
+long targetLocationNumber = 1000;
 
 
 
 
 
 
-
-
-
-
-float P = 0.0003;
+float P = 0.00035;
 float I = 0;//.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
 float D = 0.085;
 float integral = 0;
-float generalSpeedFactor = 0.65;
+float generalSpeedFactor = 0.8;
 
 
-int forwardsMargin = 225;
-int backwardsMargin = 225;
+int forwardsMargin = 5; //25
+int backwardsMargin = 5;
 
 
 
@@ -90,7 +89,8 @@ void setup() {
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
+  //pinMode(ZFeedbHitEnd, INPUT);
 
 
 
@@ -123,6 +123,9 @@ void loop() {
   while (Serial.available() > 0) {
     char received = Serial.read();
 
+
+    missionIndex = 1;
+    targetLocationNumber = targetLocationNumber + 1000;
 
     // If newline, process command
     if (received == '\n') {
@@ -224,14 +227,14 @@ void loop() {
 
 
     } else if(missionIndex == 2){
-      if(digitalRead(ZFeedbHitEnd) == HIGH){
+      if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
         missionIndex = 1;
         locationNumber = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
         delayloops = 50;
       } else{
-        speedNDir = -0.6;
+        speedNDir = -1;
       }
     }
  
@@ -274,9 +277,9 @@ void loop() {
 
 void ZFeedb1INTERRUPT(){
   if(digitalRead(ZFeedb2) == HIGH){
-    locationNumber += 1;
-  } else{
     locationNumber -= 1;
+  } else{
+    locationNumber += 1;
   }
 }
 
@@ -284,5 +287,4 @@ void ZFeedb1INTERRUPT(){
 void ZFeedbVarvINTERRUPT(){
   locationNumber = round(locationNumber/1000.0)*1000.0;
 }
-
 
