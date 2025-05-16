@@ -92,12 +92,11 @@ void setup() {
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
 
 
 
 
-  pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(13, OUTPUT); //Permanently high

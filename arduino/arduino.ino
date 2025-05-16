@@ -97,7 +97,6 @@ void setup() {
 
 
 
-  pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(13, OUTPUT); //Permanently high
