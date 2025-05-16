@@ -29,7 +29,7 @@ router.post('/command', async (req, res) => {
     } else {
       throw new Error(`Invalid command format for key: ${command}`);
     }
-    res.json({ status: 'success', sent: command, arduinoResponse: response });
+    res.json({ status: 'success', sent: command });
   } catch (err) {
     console.log(err)
     res.status(500).json({ error: 'Failed to send command', details: err.message });
