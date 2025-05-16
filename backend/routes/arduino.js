@@ -30,7 +30,7 @@ router.post('/command', async (req, res) => {
     }
     res.json({ status: 'success', sent: command, arduinoResponse: response });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to send command', details: err.message });
+    res.status(500).json({ error: 'alskjdfFailed to send command', details: err.message });
   }
 });
 
