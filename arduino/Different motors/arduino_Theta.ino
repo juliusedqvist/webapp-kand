@@ -64,8 +64,8 @@ float integral = 0;
 float generalSpeedFactor = 0.8;
 
 
-int forwardsMargin = 5; //25
-int backwardsMargin = 5;
+int forwardsMargin = 10;
+int backwardsMargin = 10;
 
 
 
@@ -129,8 +129,6 @@ void loop() {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
 
 
-		Serial.print("Command recieved: ");
-		Serial.println(incomingCommand);
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
@@ -198,16 +196,20 @@ void loop() {
       //If we are standing still and at the correct location:
       if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
         missionIndex = 0;
+		Serial.println("done");
       }
      
       //If we are stuck against something but very close to target location, react quickly:
-      if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
+	  //This makes little sense for theta
+      /*if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
         missionIndex = 0;
-      }
+		Serial.println("done");
+      }*/
      
       //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
+      if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
         missionIndex = 0;
+		Serial.println("fuck");
         //GRAB
         //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
         //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
