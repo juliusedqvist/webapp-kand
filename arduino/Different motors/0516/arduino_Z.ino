@@ -34,14 +34,15 @@ int missionIndex = 0;
 
 
 float delayTime = 20.0;
+int delayloops = 0;
 
 
 volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
 long prevLocationNumber = locationNumber;
-long longagoPositionOne = locationNumber; //0 to 2s ago
-long longagoPositionTwo = locationNumber; //2 to 4s ago
-long longagoPositionThree = locationNumber; //4 to 6s ago
-int loopsPerLongagoPositionUpdate = 2000/delayTime;
+long longagoPositionOne = locationNumber; //0 to 1.5s ago
+long longagoPositionTwo = locationNumber; //1.5 to 3s ago
+long longagoPositionThree = locationNumber; //3 to 4.5s ago
+int loopsPerLongagoPositionUpdate = 1500/delayTime;
 int counter = 0;
 
 
@@ -150,7 +151,7 @@ void loop() {
 
 
   counter += 1;
-  if(counter % loopsPerLongagoPositionUpdate == 0){
+  if(counter % 125 == 0){
     longagoPositionThree = longagoPositionTwo;
     longagoPositionTwo = longagoPositionOne;
     longagoPositionOne = locationNumber;
@@ -158,6 +159,9 @@ void loop() {
 
 
   float speedNDir = 0;
+  if(delayloops > 0){
+    delayloops -= 1;
+  } else{
     if(missionIndex == 1){
       float e = targetLocationNumber - locationNumber;
       float derivative = (locationNumber - prevLocationNumber)/delayTime;
@@ -226,13 +230,13 @@ void loop() {
         locationNumber = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
-		longagoPositionThree = 0;
-		longagoPositionTwo = 0;
-		longagoPositionOne = 0;
+        delayloops = 50;
       } else{
         speedNDir = -0.6;
       }
     }
+ 
+  }
 
 
  
@@ -257,7 +261,7 @@ void loop() {
     analogWrite(ZDriveF, 0);
     analogWrite(ZDriveB, 0);
   }
-  if(missionIndex == 1){
+  if(missionIndex != 2 || delayloops != 0){
     delay(delayTime);
   }
 }
