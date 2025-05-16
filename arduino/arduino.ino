@@ -9,7 +9,6 @@
 #define ZFeedb2 5 //The motors channel A, I think
 #define ZFeedbVarv 3 //The motors channel Z
 #define ZFeedbHitEnd A5
-#define lockPin 8
 
 
 
@@ -19,8 +18,12 @@
 #endif
 
 
+
+
 char buffer[64];
 String incomingCommand = "";
+
+
 
 
 //0: Stand still
@@ -37,7 +40,7 @@ float delayTime = 20.0;
 int delayloops = 0;
 
 
-volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
+volatile long locationNumber = 0; //Goes from 0 to like, 40-50k or smth
 long prevLocationNumber = locationNumber;
 long longagoPositionOne = locationNumber; //0 to 1.5s ago
 long longagoPositionTwo = locationNumber; //1.5 to 3s ago
@@ -53,20 +56,16 @@ long targetLocationNumber = 0;
 
 
 
-
-
-
-
 float P = 0.0003;
 float I = 0;//.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
 float D = 0.085;
 float integral = 0;
-float generalSpeedFactor = 0.65;
+float generalSpeedFactor = 0.8;
 
 
-int forwardsMargin = 225;
-int backwardsMargin = 225;
+int forwardsMargin = 10;
+int backwardsMargin = 10;
 
 
 
@@ -90,7 +89,8 @@ void setup() {
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
+  //pinMode(ZFeedbHitEnd, INPUT);
 
 
 
@@ -200,13 +200,14 @@ void loop() {
       }
      
       //If we are stuck against something but very close to target location, react quickly:
-      if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 500)){
+	  //This makes little sense for theta
+      /*if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
         missionIndex = 0;
 		Serial.println("done");
-      }
+      }*/
      
       //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1000)){
+      if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
         missionIndex = 0;
 		Serial.println("fuck");
         //GRAB
@@ -225,14 +226,14 @@ void loop() {
 
 
     } else if(missionIndex == 2){
-      if(digitalRead(ZFeedbHitEnd) == HIGH){
+      if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
         missionIndex = 1;
         locationNumber = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
         delayloops = 50;
       } else{
-        speedNDir = -0.6;
+        speedNDir = -1;
       }
     }
  
@@ -275,9 +276,9 @@ void loop() {
 
 void ZFeedb1INTERRUPT(){
   if(digitalRead(ZFeedb2) == HIGH){
-    locationNumber += 1;
-  } else{
     locationNumber -= 1;
+  } else{
+    locationNumber += 1;
   }
 }
 
@@ -285,5 +286,4 @@ void ZFeedb1INTERRUPT(){
 void ZFeedbVarvINTERRUPT(){
   locationNumber = round(locationNumber/1000.0)*1000.0;
 }
-
 
