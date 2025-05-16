@@ -1,10 +1,12 @@
+// services/arduinoController.js
 const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline');
 
 let ports = {};
 let idToPort = {};
+let portToParser = {};
 
-const candidates = ['/dev/ttyUSB0', '/dev/ttyUSB1']; // or use serial/by-id for stability
+const candidates = ['/dev/ttyUSB0', '/dev/ttyUSB1', '/dev/ttyUSB2']; // Or use serial/by-id for stability
 
 for (const path of candidates) {
   const port = new SerialPort({ path, baudRate: 9600 });
@@ -12,6 +14,7 @@ for (const path of candidates) {
   port.on('open', () => {
     console.log(`Port opened: ${path}`);
     const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
+    portToParser[path] = parser;
 
     parser.on('data', data => {
       const trimmed = data.trim();
@@ -20,11 +23,8 @@ for (const path of candidates) {
       // If it reports ID like "ID:1"
       if (trimmed.startsWith('ID:')) {
         const id = trimmed.split(':')[1];
-
-        // Store mapping
         idToPort[id] = port;
         ports[path] = port;
-
         console.log(`Mapped Arduino ID ${id} to ${path}`);
       }
     });
@@ -35,29 +35,48 @@ for (const path of candidates) {
   });
 }
 
-
-// Exported function: just writes to the existing port
-
-
 function sendToArduino(id, command) {
-  const port = idToPort[id];
+  return new Promise((resolve, reject) => {
+    const port = idToPort[id];
 
-  if (!port || !port.writable) {
-    console.error(`No writable port for ID ${id}`);
-    return;
-  }
-
-  port.write(command + '\n', (err) => {
-    if (err) {
-      console.error(`Error writing to Arduino ID ${id}:`, err.message);
-    } else {
-      console.log(`Command sent to Arduino ID ${id}:`, command);
+    if (!port || !port.writable) {
+      return reject(new Error(`No writable port for ID ${id}`));
     }
+
+    const parser = portToParser[port.path];
+    if (!parser) {
+      return reject(new Error(`No parser found for port ${port.path}`));
+    }
+
+    const onData = (data) => {
+      const trimmed = data.trim().toLowerCase();
+      console.log(`Response from Arduino ID ${id}: ${trimmed}`);
+
+      if (trimmed === 'done' || trimmed === 'fuck') {
+        parser.off('data', onData);
+        resolve(trimmed);
+      }
+    };
+
+    parser.on('data', onData);
+
+    port.write(command + '\n', (err) => {
+      if (err) {
+        parser.off('data', onData);
+        return reject(err);
+      } else {
+        console.log(`Command sent to Arduino ID ${id}: ${command}`);
+      }
+    });
+
+    // Timeout in case of no response
+    setTimeout(() => {
+      parser.off('data', onData);
+      reject(new Error('Timeout waiting for Arduino response'));
+    }, 5000);
   });
 }
 
-
-
 module.exports = {
-    sendToArduino,
+  sendToArduino,
 };
