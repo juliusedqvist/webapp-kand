@@ -156,7 +156,7 @@ async function runNextAction() {
 // Reusable helper for sending commands
 async function sendCommand(command) {
   console.log("Sending command:", command);
-  await axios.post('http://localhost:3000/api/arduino/command', { command }, timeout: 10000);
+  await axios.post('http://localhost:3000/api/arduino/command', { command });
 }
 
 
