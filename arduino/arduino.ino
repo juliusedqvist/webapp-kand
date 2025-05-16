@@ -224,7 +224,7 @@ void loop() {
 
 
 	} else if(missionIndex == 2){
-	  if(digitalRead(ZFeedbHitEnd) == HIGH){
+	  if(digitalRead(ZFeedbHitEnd) == LOW){
 		missionIndex = 0;
 		locationNumber = 0;
 		integral = 0;
