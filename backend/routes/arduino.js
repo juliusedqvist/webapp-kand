@@ -21,7 +21,7 @@ router.post('/command', async (req, res) => {
     if (Array.isArray(commands)) {
       for (const cmd of commands) {
         console.log(cmd)
-        await sendToArduino(1, cmd);
+        // await sendToArduino(1, cmd);
       }
     } else if (typeof commands === 'string') {
   await sendToArduino(1, commands);
