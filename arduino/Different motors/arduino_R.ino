@@ -232,6 +232,7 @@ void loop() {
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
+		Serial.println("done");
 	  } else{
 		speedNDir = -0.6;
 	  }
@@ -272,7 +273,7 @@ void loop() {
 
 
 void ZFeedb1INTERRUPT(){
-  if(digitalRead(ZFeedb2) == HIGH){
+  if(digitalRead(ZFeedb2) == LOW){
     locationNumber += 1;
   } else{
     locationNumber -= 1;
