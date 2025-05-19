@@ -5,6 +5,7 @@ const { sendToArduino } = require('../services/arduinoController');
 
 const position_reference = {
   B1_pickup: [[10000, 1], [5000, 0]],
+  A1_leave: [[20000, 1], [5000, 0]],
   RESET: [["RESET", 0], ["RESET", 1]],
   STOP: "STOP",
   RESUME: "RESUME"
