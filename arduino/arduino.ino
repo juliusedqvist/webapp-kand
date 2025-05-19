@@ -3,12 +3,12 @@
 
 
 
-#define ZDriveF 9
-#define ZDriveB 10
+#define ZDriveF 10
+#define ZDriveB 9
 #define ZFeedb1 2 //The motors channel B, I think. It is synchronius with channel Z
 #define ZFeedb2 5 //The motors channel A, I think
 #define ZFeedbVarv 3 //The motors channel Z
-#define ZFeedbHitEnd 4
+#define ZFeedbHitEnd A5
 
 
 
@@ -31,6 +31,9 @@ String incomingCommand = "";
 //2: Reset
 int missionIndex = 0;
 
+//used for resume
+int savedMissionIndex = 0;
+
 
 
 
@@ -38,13 +41,12 @@ int missionIndex = 0;
 
 float delayTime = 20.0;
 
-
-volatile long locationNumber = 0; //Goes from 0 to somewhere between 10k and 20k
+volatile long locationNumber = 0; //Goes from 0 to like, 40-50k or smth
 long prevLocationNumber = locationNumber;
-long longagoPositionOne = locationNumber; //0 to 1.5s ago
-long longagoPositionTwo = locationNumber; //1.5 to 3s ago
-long longagoPositionThree = locationNumber; //3 to 4.5s ago
-int loopsPerLongagoPositionUpdate = 1500/delayTime;
+long longagoPositionOne = locationNumber; //0 to 2s ago
+long longagoPositionTwo = locationNumber; //2 to 4s ago
+long longagoPositionThree = locationNumber; //4 to 6s ago
+int loopsPerLongagoPositionUpdate = 2000/delayTime;
 int counter = 0;
 
 
@@ -55,20 +57,16 @@ long targetLocationNumber = 0;
 
 
 
-
-
-
-
-float P = 0.00035;
-float I = 0.000000005;
+float P = 0.0003;
+float I = 0;//.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
-float D = 0.05;
+float D = 0.085;
 float integral = 0;
-float generalSpeedFactor = 0.45;
+float generalSpeedFactor = 0.8;
 
 
-int forwardsMargin = 25;
-int backwardsMargin = 5;
+int forwardsMargin = 10;
+int backwardsMargin = 10;
 
 
 
@@ -93,10 +91,12 @@ void setup() {
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
   pinMode(ZFeedbHitEnd, INPUT_PULLUP);
+  //pinMode(ZFeedbHitEnd, INPUT);
 
 
 
 
+  pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(13, OUTPUT); //Permanently high
@@ -132,14 +132,20 @@ void loop() {
 
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
+		savedMissionIndex = 2;
+		Serial.println("RECIEVED: RESET");
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
+		Serial.println("done");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
-        missionIndex = 1;
+        missionIndex = savedMissionIndex;
+		Serial.println("RECIEVED: RESUME");
       } else {
         missionIndex = 1;
+		savedMissionIndex = 1;
         targetLocationNumber = atoi(incomingCommand.c_str());
       }
+
 
 
       incomingCommand = ""; // Reset buffer
@@ -160,7 +166,6 @@ void loop() {
 
 
   float speedNDir = 0;
-  
 	if(missionIndex == 1){
 	  float e = targetLocationNumber - locationNumber;
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
@@ -195,18 +200,22 @@ void loop() {
 	  //If we are standing still and at the correct location:
 	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
 		missionIndex = 0;
+		savedMissionIndex = 0;
 		Serial.println("done");
 	  }
 	 
 	  //If we are stuck against something but very close to target location, react quickly:
-	  if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
+	  //This makes little sense for theta
+	  /*if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
 		missionIndex = 0;
+		savedMissionIndex = 0;
 		Serial.println("done");
-	  }
+	  }*/
 	 
 	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-	  if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
+	  if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
 		missionIndex = 0;
+		savedMissionIndex = 0;
 		Serial.println("fuck");
 		//GRAB
 		//REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
@@ -224,8 +233,12 @@ void loop() {
 
 
 	} else if(missionIndex == 2){
-	  if(digitalRead(ZFeedbHitEnd) == LOW){
+	  if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
 		missionIndex = 0;
+		//targetLocationNumber = 5000;
+		
+		
+		savedMissionIndex = 0;
 		locationNumber = 0;
 		integral = 0;
 		antistuckCurrentPWMBonus = 0;
@@ -234,12 +247,9 @@ void loop() {
 		longagoPositionOne = 0;
 		Serial.println("done");
 	  } else{
-		speedNDir = -0.6;
+		speedNDir = -0.7;
 	  }
 	}
-
- 
-
 
 
 
@@ -274,9 +284,9 @@ void loop() {
 
 void ZFeedb1INTERRUPT(){
   if(digitalRead(ZFeedb2) == HIGH){
-    locationNumber += 1;
-  } else{
     locationNumber -= 1;
+  } else{
+    locationNumber += 1;
   }
 }
 
@@ -284,5 +294,4 @@ void ZFeedb1INTERRUPT(){
 void ZFeedbVarvINTERRUPT(){
   locationNumber = round(locationNumber/1000.0)*1000.0;
 }
-
 
