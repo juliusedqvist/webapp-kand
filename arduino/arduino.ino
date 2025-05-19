@@ -9,6 +9,7 @@
 #define ZFeedb2 5 //The motors channel A, I think
 #define ZFeedbVarv 3 //The motors channel Z
 #define ZFeedbHitEnd A5
+#define lockPin 8
 
 
 
@@ -18,12 +19,8 @@
 #endif
 
 
-
-
 char buffer[64];
 String incomingCommand = "";
-
-
 
 
 //0: Stand still
@@ -41,7 +38,8 @@ int savedMissionIndex = 0;
 
 float delayTime = 20.0;
 
-volatile long locationNumber = 0; //Goes from 0 to like, 40-50k or smth
+
+volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
 long prevLocationNumber = locationNumber;
 long longagoPositionOne = locationNumber; //0 to 2s ago
 long longagoPositionTwo = locationNumber; //2 to 4s ago
@@ -57,16 +55,20 @@ long targetLocationNumber = 0;
 
 
 
+
+
+
+
 float P = 0.0003;
 float I = 0;//.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
 float D = 0.085;
 float integral = 0;
-float generalSpeedFactor = 0.8;
+float generalSpeedFactor = 0.65;
 
 
-int forwardsMargin = 10;
-int backwardsMargin = 10;
+int forwardsMargin = 225;
+int backwardsMargin = 225;
 
 
 
@@ -90,8 +92,7 @@ void setup() {
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
-  //pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(ZFeedbHitEnd, INPUT);
 
 
 
@@ -133,13 +134,11 @@ void loop() {
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
 		savedMissionIndex = 2;
-		Serial.println("RECIEVED: RESET");
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
 		Serial.println("stopped");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
-		Serial.println("RECIEVED: RESUME");
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
@@ -166,90 +165,90 @@ void loop() {
 
 
   float speedNDir = 0;
-	if(missionIndex == 1){
-	  float e = targetLocationNumber - locationNumber;
-	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
-	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+    if(missionIndex == 1){
+      float e = targetLocationNumber - locationNumber;
+      float derivative = (locationNumber - prevLocationNumber)/delayTime;
+      speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+   
+   
+      if(1000*derivative < 250){
+        if(abs(locationNumber - targetLocationNumber) < 1000){
+          if(locationNumber > targetLocationNumber){
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+          } else{
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+          }
+        }
+      }
+      if(abs(locationNumber - targetLocationNumber) > 2000){
+        antistuckCurrentPWMBonus = 0;
+      }
+     
+      if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
+        speedNDir = 0;
+        integral = 0;
+        antistuckCurrentPWMBonus = 0;
+      }
+      if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
+        speedNDir = 0;
+        integral = 0;
+        antistuckCurrentPWMBonus = 0;
+      }
 
 
-	  if(1000*derivative < 250){
-		if(abs(locationNumber - targetLocationNumber) < 1000){
-		  if(locationNumber > targetLocationNumber){
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
-		  } else{
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
-		  }
-		}
-	  }
-	  if(abs(locationNumber - targetLocationNumber) > 2000){
-		antistuckCurrentPWMBonus = 0;
-	  }
-	 
-	  if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
-		speedNDir = 0;
-		integral = 0;
-		antistuckCurrentPWMBonus = 0;
-	  }
-	  if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
-		speedNDir = 0;
-		integral = 0;
-		antistuckCurrentPWMBonus = 0;
-	  }
-
-
-	  //If we are standing still and at the correct location:
-	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
-		missionIndex = 0;
+      //If we are standing still and at the correct location:
+      if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
+        missionIndex = 0;
 		savedMissionIndex = 0;
 		Serial.println("done");
-	  }
-	 
-	  //If we are stuck against something but very close to target location, react quickly:
-	  //This makes little sense for theta
-	  /*if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
-		missionIndex = 0;
+      }
+     
+      //If we are stuck against something but very close to target location, react quickly:
+      if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 500)){
+        missionIndex = 0;
 		savedMissionIndex = 0;
 		Serial.println("done");
-	  }*/
-	 
-	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-	  if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
-		missionIndex = 0;
+      }
+     
+      //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
+      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1000)){
+        missionIndex = 0;
 		savedMissionIndex = 0;
 		Serial.println("fuck");
-		//GRAB
-		//REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
-		//REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
-	  }
+        //GRAB
+        //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
+        //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
+      }
 
 
 
 
-	 
-	  if(prevLocationNumber != locationNumber){
-		integral = integral + e*delayTime;
-	  }
-	  prevLocationNumber = locationNumber;
+     
+      if(prevLocationNumber != locationNumber){
+        integral = integral + e*delayTime;
+      }
+      prevLocationNumber = locationNumber;
 
 
-	} else if(missionIndex == 2){
-	  if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
-		missionIndex = 0;
-		//targetLocationNumber = 5000;
-		
-		
+    } else if(missionIndex == 2){
+      if(digitalRead(ZFeedbHitEnd) == HIGH){
+        missionIndex = 0;
 		savedMissionIndex = 0;
-		locationNumber = 0;
-		integral = 0;
-		antistuckCurrentPWMBonus = 0;
+        locationNumber = 0;
+        integral = 0;
+        antistuckCurrentPWMBonus = 0;
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		Serial.println("done");
-	  } else{
-		speedNDir = -0.7;
-	  }
-	}
+      } else{
+        speedNDir = -0.6;
+      }
+    }
+
+
+ 
+
 
 
 
@@ -284,9 +283,9 @@ void loop() {
 
 void ZFeedb1INTERRUPT(){
   if(digitalRead(ZFeedb2) == HIGH){
-    locationNumber -= 1;
-  } else{
     locationNumber += 1;
+  } else{
+    locationNumber -= 1;
   }
 }
 
@@ -294,4 +293,5 @@ void ZFeedb1INTERRUPT(){
 void ZFeedbVarvINTERRUPT(){
   locationNumber = round(locationNumber/1000.0)*1000.0;
 }
+
 
