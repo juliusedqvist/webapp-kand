@@ -138,13 +138,15 @@ void loop() {
 		savedMissionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
-		Serial.println("done");
+		Serial.println("stopped");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
         targetLocationNumber = atoi(incomingCommand.c_str());
+		Serial.print("LOCATION NUMBER ");
+		Serial.println(locationNumber);
       }
 
 
