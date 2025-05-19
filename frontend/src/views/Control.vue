@@ -65,9 +65,9 @@
       <div class="next-action-panel">
         <div class="panel-header">Commands</div>
         <div class="btn-display">
-          <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP')">STOP</button>
-          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET')">RESET</button>
-          <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME')">RESUME</button>
+          <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP');sendCommand('STOP')">STOP</button>
+          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET');sendCommand('RESET')">RESET</button>
+          <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME');sendCommand('RESUME')">RESUME</button>
           <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN NEXT</button>
         </div>
       </div>
