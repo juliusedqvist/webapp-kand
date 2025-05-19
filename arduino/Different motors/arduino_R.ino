@@ -67,7 +67,7 @@ float I = 0.000000005;
 float antistuckCurrentPWMBonus = 0;
 float D = 0.05;
 float integral = 0;
-float generalSpeedFactor = 0.45;
+float generalSpeedFactor = 0.145;
 
 
 int forwardsMargin = 25;
