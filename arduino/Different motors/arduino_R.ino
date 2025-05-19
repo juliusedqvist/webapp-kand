@@ -145,8 +145,6 @@ void loop() {
         missionIndex = 1;
 		savedMissionIndex = 1;
         targetLocationNumber = atoi(incomingCommand.c_str());
-		Serial.print("LOCATION NUMBER ");
-		Serial.println(locationNumber);
       }
 
 

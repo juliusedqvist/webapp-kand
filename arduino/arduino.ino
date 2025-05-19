@@ -60,9 +60,9 @@ long targetLocationNumber = 0;
 
 
 float P = 0.0003;
-float I = 0;//.000000005;//.00000025;
+float I = 0.000000005;//.00000025;
 float antistuckCurrentPWMBonus = 0;
-float D = 0.085;
+float D = 0;//.085;
 float integral = 0;
 float generalSpeedFactor = 0.65;
 
@@ -93,6 +93,7 @@ void setup() {
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
   pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(lockPin, OUTPUT);
 
 
 
@@ -164,15 +165,18 @@ void loop() {
   }
 
 
-  float speedNDir = 0;
-    if(missionIndex == 1){
+	float speedNDir = 0;
+	if(missionIndex == 0){
+		digitalWrite(lockPin, LOW); //Turn the lock ON
+	} else if(missionIndex == 1){
+		digitalWrite(lockPin, HIGH); //Turn the lock OFF
       float e = targetLocationNumber - locationNumber;
       float derivative = (locationNumber - prevLocationNumber)/delayTime;
       speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
    
    
       if(1000*derivative < 250){
-        if(abs(locationNumber - targetLocationNumber) < 1000){
+        if(abs(locationNumber - targetLocationNumber) < 6000){
           if(locationNumber > targetLocationNumber){
             antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
           } else{
@@ -180,7 +184,7 @@ void loop() {
           }
         }
       }
-      if(abs(locationNumber - targetLocationNumber) > 2000){
+      if(abs(locationNumber - targetLocationNumber) > 8000){
         antistuckCurrentPWMBonus = 0;
       }
      
@@ -231,7 +235,7 @@ void loop() {
 
 
     } else if(missionIndex == 2){
-      if(digitalRead(ZFeedbHitEnd) == HIGH){
+      if(analogRead(ZFeedbHitEnd) > 150){
         missionIndex = 0;
 		savedMissionIndex = 0;
         locationNumber = 0;
@@ -241,8 +245,12 @@ void loop() {
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		Serial.println("done");
+
+		digitalWrite(lockPin, LOW); //Turn the lock ON
       } else{
-        speedNDir = -0.6;
+
+		digitalWrite(lockPin, HIGH); //Turn the lock OFF
+        speedNDir = -0.4;
       }
     }
 
