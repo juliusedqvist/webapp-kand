@@ -73,7 +73,7 @@ function sendToArduino(id, command) {
     setTimeout(() => {
       parser.off('data', onData);
       reject(new Error('Timeout waiting for Arduino response'));
-    }, 15000);
+    }, 25000);
   });
 }
 

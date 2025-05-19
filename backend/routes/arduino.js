@@ -5,11 +5,14 @@ const { sendToArduino } = require('../services/arduinoController');
 
 const position_reference = {
   B1_pickup: [[10000, 1], [5000, 0]],
-  RESET: [["RESET", 0], ["RESET", 1]]
+  RESET: [["RESET", 0], ["RESET", 1]],
+  STOP: [["STOP", 0], ["STOP", 1]], //, ["STOP", 2]]
+  RESUME: [["RESUME", 0], ["RESUME", 1]] //, ["STOP", 2]]
 }
 
 router.post('/command', async (req, res) => {
   const { id, command } = req.body;
+  console.log(req.body);
 
   if (!command || typeof command !== 'string') {
     return res.status(400).json({ error: 'Command must be a non-empty string' });
