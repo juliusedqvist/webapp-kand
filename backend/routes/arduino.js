@@ -6,7 +6,7 @@ const { sendToArduino } = require('../services/arduinoController');
 const position_reference = {
   B1_pickup: [[10000, 1], [5000, 0]],
   RESET: [["RESET", 0], ["RESET", 1]],
-  STOP: [["STOP", 0], ["STOP", 1]], //, ["STOP", 2]]
+  STOP: "STOP",
   RESUME: [["RESUME", 0], ["RESUME", 1]] //, ["STOP", 2]]
 }
 
@@ -28,7 +28,9 @@ router.post('/command', async (req, res) => {
         await sendToArduino(cmd[1], cmd[0]);
       }
     } else if (typeof commands === 'string') {
-      await sendToArduino(1, commands);
+      sendToArduino(0, commands);
+      sendToArduino(1, commands);
+      // sendToArduino(2, commands);
     } else {
       throw new Error(`Invalid command format for key: ${command}`);
     }
