@@ -4,9 +4,9 @@ const router = express.Router();
 const { sendToArduino } = require('../services/arduinoController');
 
 const position_reference = {
-  B1_pickup: [[10000, 1], [4000, 0], ["RESET", 0]],
-  A1_leave: [[20000, 1], [4000, 0], ["RESET", 0]],
-  RESET: [["RESET", 0], ["RESET", 1]],
+  B1_pickup: [[10000, 1], [4000, 0], [15000, 2], ["RESET", 0]],
+  A1_leave: [[20000, 1], [4000, 0], [15000, 2], ["RESET", 0]],
+  RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
   RESUME: "RESUME"
 }
@@ -31,7 +31,7 @@ router.post('/command', async (req, res) => {
     } else if (typeof commands === 'string') {
       sendToArduino(0, commands);
       sendToArduino(1, commands);
-      // sendToArduino(2, commands);
+      sendToArduino(2, commands);
     } else {
       throw new Error(`Invalid command format for key: ${command}`);
     }
