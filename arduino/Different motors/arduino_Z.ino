@@ -28,6 +28,9 @@ String incomingCommand = "";
 //2: Reset
 int missionIndex = 0;
 
+//used for resume
+int savedMissionIndex = 0;
+
 
 
 
@@ -130,14 +133,17 @@ void loop() {
 
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
+		savedMissionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
-        missionIndex = 1;
+        missionIndex = savedMissionIndex;
       } else {
         missionIndex = 1;
+		savedMissionIndex = 1;
         targetLocationNumber = atoi(incomingCommand.c_str());
       }
+
 
 
       incomingCommand = ""; // Reset buffer
@@ -192,18 +198,21 @@ void loop() {
       //If we are standing still and at the correct location:
       if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
         missionIndex = 0;
+		savedMissionIndex = 0;
 		Serial.println("done");
       }
      
       //If we are stuck against something but very close to target location, react quickly:
       if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 500)){
         missionIndex = 0;
+		savedMissionIndex = 0;
 		Serial.println("done");
       }
      
       //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
       if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1000)){
         missionIndex = 0;
+		savedMissionIndex = 0;
 		Serial.println("fuck");
         //GRAB
         //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
@@ -223,6 +232,7 @@ void loop() {
     } else if(missionIndex == 2){
       if(digitalRead(ZFeedbHitEnd) == HIGH){
         missionIndex = 0;
+		savedMissionIndex = 0;
         locationNumber = 0;
         integral = 0;
         antistuckCurrentPWMBonus = 0;
