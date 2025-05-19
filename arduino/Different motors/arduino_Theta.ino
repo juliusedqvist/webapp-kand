@@ -231,8 +231,8 @@ void loop() {
 
 	} else if(missionIndex == 2){
 	  if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
-		missionIndex = 1;
-		targetLocationNumber = 5000;
+		missionIndex = 0;
+		//targetLocationNumber = 5000;
 		
 		
 		savedMissionIndex = 0;
@@ -243,6 +243,7 @@ void loop() {
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		Serial.println("done");
+		Serial.println("RESET DONE");
 	  } else{
 		speedNDir = -0.7;
 	  }
