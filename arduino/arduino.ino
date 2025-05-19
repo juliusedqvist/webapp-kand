@@ -92,12 +92,11 @@ void setup() {
   pinMode(ZFeedb1, INPUT);
   pinMode(ZFeedb2, INPUT);
   pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
 
 
 
 
-  pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(13, OUTPUT); //Permanently high
@@ -225,7 +224,7 @@ void loop() {
 
 
 	} else if(missionIndex == 2){
-	  if(digitalRead(ZFeedbHitEnd) == HIGH){
+	  if(digitalRead(ZFeedbHitEnd) == LOW){
 		missionIndex = 0;
 		locationNumber = 0;
 		integral = 0;
@@ -233,6 +232,7 @@ void loop() {
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
+		Serial.println("done");
 	  } else{
 		speedNDir = -0.6;
 	  }
