@@ -138,6 +138,7 @@ void loop() {
 		savedMissionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
+		Serial.println("done");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
       } else {
