@@ -67,7 +67,7 @@ float I = 0.000000005;
 float antistuckCurrentPWMBonus = 0;
 float D = 0.05;
 float integral = 0;
-float generalSpeedFactor = 0.145;
+float generalSpeedFactor = 0.45;
 
 
 int forwardsMargin = 25;
@@ -145,6 +145,8 @@ void loop() {
         missionIndex = 1;
 		savedMissionIndex = 1;
         targetLocationNumber = atoi(incomingCommand.c_str());
+		Serial.print("LOCATION NUMBER ");
+		Serial.println(locationNumber);
       }
 
 
