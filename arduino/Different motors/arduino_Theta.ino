@@ -133,13 +133,13 @@ void loop() {
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
 		savedMissionIndex = 2;
-		serial.println("RECIEVED: RESET");
+		Serial.println("RECIEVED: RESET");
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
-		serial.println("RECIEVED: STOP");
+		Serial.println("RECIEVED: STOP");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
-		serial.println("RECIEVED: RESUME");
+		Serial.println("RECIEVED: RESUME");
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
