@@ -11,6 +11,7 @@ const position_reference = {
 
 router.post('/command', async (req, res) => {
   const { id, command } = req.body;
+  console.log(req.body);
 
   if (!command || typeof command !== 'string') {
     return res.status(400).json({ error: 'Command must be a non-empty string' });
