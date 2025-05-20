@@ -66,7 +66,7 @@
         <div class="panel-header">Commands</div>
         <div class="btn-display">
           <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP', false);sendCommand('STOP')">STOP</button>
-          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET', false);sendCommand('RESET', true)">RESET</button>
+          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET', false);sendCommand('RESET')">RESET</button>
           <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME', false);sendCommand('RESUME')">RESUME</button>
           <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN NEXT</button>
           <button class="panel-btn" style="background-color: #004073; color: white;" @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
@@ -175,7 +175,8 @@ async function sendCommand(command, responseWanted = false) {
         const { id, response } = item;
         const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
         console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
-        log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
+        // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
+        log(`Position of ${motorName}: ${response}`, 'info');
       });
     } else {
       console.warn("Expected an array but got:", received);
