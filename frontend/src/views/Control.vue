@@ -164,9 +164,9 @@ async function sendCommand(command, responseWanted = false) {
 
     // ID to name mapping
     const idNameMap = {
-      ID2: 'Z-motor',
-      ID1: 'Theta-motor',
-      ID0: 'R-motor'
+      2: 'Z-motor',
+      1: 'Theta-motor',
+      0: 'R-motor'
     };
 
     // Extract and log id and response from each item
