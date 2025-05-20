@@ -52,11 +52,7 @@ function sendToArduino(id, command) {
       const trimmed = data.trim().toLowerCase();
       console.log(`Response from Arduino ID ${id}: ${trimmed}`);
 
-      if (
-        trimmed === 'done' ||
-        trimmed === 'fuck' ||
-        trimmed.includes('current position:')
-      ) {
+      if (trimmed === 'done' || trimmed === 'fuck') {
         parser.off('data', onData);
         resolve(trimmed);
       }
