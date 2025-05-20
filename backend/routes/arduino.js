@@ -23,25 +23,35 @@ router.post('/command', async (req, res) => {
 
   try {
     const commands = position_reference[command];
-    const response = "";
+    let response = ""; // <-- use let so we can reassign
 
-    console.log(commands)
+    console.log(commands);
     if (Array.isArray(commands)) {
+      const responses = [];
       for (const cmd of commands) {
-        console.log(cmd)
-        const response = await sendToArduino(cmd[1], cmd[0]);
+        console.log(cmd);
+        const resData = await sendToArduino(cmd[1], cmd[0]);
+        responses.push({ id: cmd[1], command: cmd[0], response: resData });
       }
+      response = responses;
     } else if (typeof commands === 'string') {
-      const response = await sendBroadcastCommand(commands);
+      const broadcastResponses = await sendBroadcastCommand(commands);
+      response = broadcastResponses.map((res, i) => ({
+        id: i,
+        command: commands,
+        response: res
+      }));
     } else {
       throw new Error(`Invalid command format for key: ${command}`);
     }
+
     res.json({ status: 'success', sent: command, received: response });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res.status(500).json({ error: 'Failed to send command', details: err.message });
   }
 });
+
 
 module.exports = router;
 
