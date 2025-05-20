@@ -23,7 +23,7 @@ router.post('/command', async (req, res) => {
 
   try {
     const commands = position_reference[command];
-    const response;
+    const response = "";
 
     console.log(commands)
     if (Array.isArray(commands)) {
