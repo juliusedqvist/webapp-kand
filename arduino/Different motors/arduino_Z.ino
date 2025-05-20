@@ -193,13 +193,17 @@ void loop() {
 	  //If we pass the goal, we're done. Turn the lock on asap and then declare that we're done.
       if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
         missionIndex = 0;
+		speedNDir = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
 		Serial.println("done");
       }
       if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
         missionIndex = 0;
+		speedNDir = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
 		Serial.println("done");
       }
@@ -217,6 +221,7 @@ void loop() {
       if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1000)){
         missionIndex = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("fuck");
         //GRAB
         //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
@@ -243,6 +248,7 @@ void loop() {
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
         speedNDir = 0;
 
@@ -299,7 +305,15 @@ void Feedb1INTERRUPT(){
 
 
 void FeedbVarvINTERRUPT(){
-  locationNumber = round(locationNumber/1000.0)*1000.0;
+	locationNumber = round(locationNumber/1000.0)*1000.0;
+	if(locationNumber - locationNumberPreviousVarvInterrupt < 200){
+		numberOfSusVarvInterrupts += 1;
+		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
+			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
+			Serial.println("fuck :VarvInterruptSpam");
+			missionIndex = 0;
+		}
+	}
+	locationNumberPreviousVarvInterrupt = newLocationNumber
 }
-
 
