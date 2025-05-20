@@ -307,6 +307,6 @@ void FeedbVarvINTERRUPT(){
 			missionIndex = 0;
 		}
 	}
-	locationNumberPreviousVarvInterrupt = newLocationNumber
+	locationNumberPreviousVarvInterrupt = locationNumber
 }
 
