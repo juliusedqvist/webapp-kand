@@ -134,7 +134,7 @@ void loop() {
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
 		Serial.print("stopped");
-		Serial.print(debugNum);
+		Serial.println(debugNum);
 		debugNum = debugNum + 1;
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
