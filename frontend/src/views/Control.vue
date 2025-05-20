@@ -176,7 +176,7 @@ async function sendCommand(command, responseWanted = false) {
         const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
         console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
         // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
-        log(`Position of ${motorName}: ${response}`, 'info');
+        log(`${motorName}: ${response}`, 'info');
       });
     } else {
       console.warn("Expected an array but got:", received);
