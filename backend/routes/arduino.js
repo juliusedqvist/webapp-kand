@@ -8,7 +8,8 @@ const position_reference = {
   A1_leave: [[20000, 1], [4000, 0], [15000, 2], ["RESET", 0]],
   RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
-  RESUME: "RESUME"
+  RESUME: "RESUME",
+  REQUEST_POS: "REQUEST_POS"
 }
 
 router.post('/command', async (req, res) => {
