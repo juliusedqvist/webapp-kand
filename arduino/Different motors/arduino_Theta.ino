@@ -3,12 +3,12 @@
 
 
 
-#define ZDriveF 10
-#define ZDriveB 9
-#define ZFeedb1 2 //The motors channel B, I think. It is synchronius with channel Z
-#define ZFeedb2 5 //The motors channel A, I think
-#define ZFeedbVarv 3 //The motors channel Z
-#define ZFeedbHitEnd A5
+#define DriveF 10
+#define DriveB 9
+#define Feedb1 2 //The motors channel B, I think. It is synchronius with channel Z
+#define Feedb2 5 //The motors channel A, I think
+#define FeedbVarv 3 //The motors channel Z
+#define FeedbHitEnd A5
 
 
 
@@ -59,17 +59,15 @@ long targetLocationNumber = 0;
 
 float P = 0.0003;
 float I = 0;//.000000005;//.00000025;
-float antistuckCurrentPWMBonus = 0;
 float D = 0.085;
-float integral = 0;
 float generalSpeedFactor = 0.8;
-
-
 int forwardsMargin = 10;
 int backwardsMargin = 10;
 
 
 
+float antistuckCurrentPWMBonus = 0;
+float integral = 0;
 
 float PWMFraction = 0.0;
 int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
@@ -80,18 +78,18 @@ int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
 // put function declarations here:
-void ZFeedb1INTERRUPT();
-void ZFeedbVarvINTERRUPT();
+void Feedb1INTERRUPT();
+void FeedbVarvINTERRUPT();
 
 
 void setup() {
-  pinMode(ZDriveF, OUTPUT);
-  pinMode(ZDriveB, OUTPUT);
-  pinMode(ZFeedb1, INPUT);
-  pinMode(ZFeedb2, INPUT);
-  pinMode(ZFeedbVarv, INPUT);
-  pinMode(ZFeedbHitEnd, INPUT_PULLUP);
-  //pinMode(ZFeedbHitEnd, INPUT);
+  pinMode(DriveF, OUTPUT);
+  pinMode(DriveB, OUTPUT);
+  pinMode(Feedb1, INPUT);
+  pinMode(Feedb2, INPUT);
+  pinMode(FeedbVarv, INPUT);
+  pinMode(FeedbHitEnd, INPUT_PULLUP);
+  //pinMode(FeedbHitEnd, INPUT);
 
 
 
@@ -103,8 +101,8 @@ void setup() {
   digitalWrite(13, HIGH);
 
 
-  attachInterrupt(digitalPinToInterrupt(ZFeedb1), ZFeedb1INTERRUPT, RISING);
-  attachInterrupt(digitalPinToInterrupt(ZFeedbVarv), ZFeedbVarvINTERRUPT, RISING);
+  attachInterrupt(digitalPinToInterrupt(Feedb1), Feedb1INTERRUPT, RISING);
+  attachInterrupt(digitalPinToInterrupt(FeedbVarv), FeedbVarvINTERRUPT, RISING);
 
 
 
@@ -138,6 +136,9 @@ void loop() {
 		Serial.println("stopped");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
+      } else if(incomingCommand.equalsIgnoreCase("REQUEST_POS")){
+        Serial.print("Current position: ");
+        Serial.println(locationNumber);
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
@@ -202,14 +203,6 @@ void loop() {
 		Serial.println("done");
 	  }
 	 
-	  //If we are stuck against something but very close to target location, react quickly:
-	  //This makes little sense for theta
-	  /*if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
-		missionIndex = 0;
-		savedMissionIndex = 0;
-		Serial.println("done");
-	  }*/
-	 
 	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
 	  if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
 		missionIndex = 0;
@@ -231,7 +224,7 @@ void loop() {
 
 
 	} else if(missionIndex == 2){
-	  if(analogRead(ZFeedbHitEnd) > 50){ //1023 is 5V
+	  if(analogRead(FeedbHitEnd) > 50){ //1023 is 5V
 		missionIndex = 0;
 		//targetLocationNumber = 5000;
 		
@@ -244,6 +237,7 @@ void loop() {
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		Serial.println("done");
+        speedNDir = 0;
 	  } else{
 		speedNDir = -0.7;
 	  }
@@ -259,14 +253,14 @@ void loop() {
 
 
   if(movementDir == 1){
-    analogWrite(ZDriveF, 255); //Driving and braking simultaneously was reccomended by the data sheet when controlling it via PWM
-    analogWrite(ZDriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
+    analogWrite(DriveF, 255); //Driving and braking simultaneously was reccomended by the data sheet when controlling it via PWM
+    analogWrite(DriveB, 255 - PWMFraction*generalSpeedFactor*255.0);
   } else if (movementDir == -1){
-    analogWrite(ZDriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
-    analogWrite(ZDriveB, 255);
+    analogWrite(DriveF, 255 - PWMFraction*generalSpeedFactor*255.0);
+    analogWrite(DriveB, 255);
   } else{
-    analogWrite(ZDriveF, 0);
-    analogWrite(ZDriveB, 0);
+    analogWrite(DriveF, 0);
+    analogWrite(DriveB, 0);
   }
   if(missionIndex == 1){
     delay(delayTime);
@@ -280,8 +274,8 @@ void loop() {
 
 
 
-void ZFeedb1INTERRUPT(){
-  if(digitalRead(ZFeedb2) == HIGH){
+void Feedb1INTERRUPT(){
+  if(digitalRead(Feedb2) == HIGH){
     locationNumber -= 1;
   } else{
     locationNumber += 1;
@@ -289,7 +283,7 @@ void ZFeedb1INTERRUPT(){
 }
 
 
-void ZFeedbVarvINTERRUPT(){
+void FeedbVarvINTERRUPT(){
   locationNumber = round(locationNumber/1000.0)*1000.0;
 }
 
