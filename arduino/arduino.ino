@@ -14,7 +14,7 @@
 
 
 #ifndef DEVICE_ID
-#define DEVICE_ID 0 // fallback ID
+#define DEVICE_ID 1 // fallback ID
 #endif
 
 
@@ -58,8 +58,8 @@ long targetLocationNumber = 0;
 
 
 float P = 0.0003;
-float I = 0;//.000000005;//.00000025;
-float D = 0.085;
+float I = 0.0000000015;//.00000025;
+float D = 0.115;
 float generalSpeedFactor = 0.6; //0.8
 int forwardsMargin = 10;
 int backwardsMargin = 10;
@@ -73,7 +73,7 @@ float PWMFraction = 0.0;
 int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
-
+int debugNum = 0;
 
 
 
@@ -133,7 +133,9 @@ void loop() {
 		savedMissionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
-		Serial.println("stopped");
+		Serial.print("stopped");
+		Serial.println(debugNum);
+		debugNum = debugNum + 1;
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
       } else if(incomingCommand.equalsIgnoreCase("REQUEST_POS")){
@@ -239,7 +241,7 @@ void loop() {
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -0.7;
+		speedNDir = -0.95;
 	  }
 	}
 
@@ -275,11 +277,12 @@ void loop() {
 
 
 void Feedb1INTERRUPT(){
-  if(digitalRead(Feedb2) == HIGH){
+	locationNumber += 10;
+/*  if(digitalRead(Feedb2) == HIGH){
     locationNumber -= 1;
   } else{
     locationNumber += 1;
-  }
+  }*/
 }
 
 
