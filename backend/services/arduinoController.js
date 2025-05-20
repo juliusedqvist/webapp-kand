@@ -36,21 +36,66 @@ for (const path of candidates) {
 }
 
 function sendBroadcastCommand(command) {
-  for (const [path, port] of Object.entries(ports)) {
-    if (!port.writable) {
-      console.warn(`Port ${path} is not writable`);
-      continue;
+  return new Promise((resolve, reject) => {
+    const responses = {};
+    const expectedIds = Object.keys(idToPort);
+    let receivedCount = 0;
+
+    if (expectedIds.length === 0) {
+      return resolve([]);
     }
 
-    port.write(command + '\n', (err) => {
-      if (err) {
-        console.error(`Failed to send command to ${path}:`, err.message);
-      } else {
-        console.log(`Broadcast command sent to ${path}: ${command}`);
+    for (const id of expectedIds) {
+      const port = idToPort[id];
+      const parser = portToParser[port.path];
+
+      if (!port.writable || !parser) {
+        console.warn(`Skipping ID ${id}: port not writable or parser missing`);
+        continue;
       }
-    });
-  }
+
+      const onData = (data) => {
+        const trimmed = data.trim();
+        console.log(`Response from ID ${id}: ${trimmed}`);
+
+        // Avoid multiple triggers
+        parser.off('data', onData);
+
+        responses[id] = trimmed;
+        receivedCount++;
+
+        if (receivedCount === expectedIds.length) {
+          // Sort responses by numeric ID order
+          const ordered = expectedIds
+            .sort((a, b) => a - b)
+            .map((id) => responses[id]);
+          resolve(ordered);
+        }
+      };
+
+      parser.on('data', onData);
+
+      port.write(command + '\n', (err) => {
+        if (err) {
+          parser.off('data', onData);
+          console.error(`Error writing to ID ${id}:`, err.message);
+          responses[id] = `Error: ${err.message}`;
+          receivedCount++;
+
+          if (receivedCount === expectedIds.length) {
+            const ordered = expectedIds
+              .sort((a, b) => a - b)
+              .map((id) => responses[id]);
+            resolve(ordered);
+          }
+        } else {
+          console.log(`Sent to ID ${id}: ${command}`);
+        }
+      });
+    }
+  });
 }
+
 
 function sendToArduino(id, command) {
   return new Promise((resolve, reject) => {
