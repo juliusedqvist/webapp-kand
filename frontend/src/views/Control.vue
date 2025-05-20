@@ -162,11 +162,19 @@ async function sendCommand(command, responseWanted = false) {
   if (responseWanted) {
     const received = res.data.received;
 
-    // Pretty print the received data
-    console.log("Response from backend:", JSON.stringify(received, null, 2));
-    log(`System response (received added): ${JSON.stringify(received)}`, 'info');
+    // Extract and log id and response from each item
+    if (Array.isArray(received)) {
+      received.forEach((item, idx) => {
+        const { id, response } = item;
+        console.log(`Item ${idx}: id=${id}, response=${response}`);
+        log(`System response: id=${id}, response=${response}`, 'info');
+      });
+    } else {
+      console.warn("Expected an array but got:", received);
+    }
   }
 }
+
 
 
 
