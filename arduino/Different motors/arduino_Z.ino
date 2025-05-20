@@ -176,7 +176,7 @@ void loop() {
    
    
       if(1000*derivative < 250){
-		  Serial.println("Antistuck action");
+		//  Serial.println("Antistuck action");
         if(abs(locationNumber - targetLocationNumber) < 6000){
           if(locationNumber > targetLocationNumber){
             antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
@@ -189,25 +189,30 @@ void loop() {
         antistuckCurrentPWMBonus = 0;
       }
      
+	 
+	  //If we pass the goal, we're done. Turn the lock on asap and then declare that we're done.
       if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
-        speedNDir = 0;
-        integral = 0;
-        antistuckCurrentPWMBonus = 0;
+        missionIndex = 0;
+		savedMissionIndex = 0;
+		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
+		Serial.println("done");
       }
       if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
-        speedNDir = 0;
-        integral = 0;
-        antistuckCurrentPWMBonus = 0;
+        missionIndex = 0;
+		savedMissionIndex = 0;
+		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
+		Serial.println("done");
       }
 
-
+/*
       //If we are standing still and at the correct location:
       if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
         missionIndex = 0;
 		savedMissionIndex = 0;
+		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
 		Serial.println("done");
       }
-     
+  */   
       //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
       if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1000)){
         missionIndex = 0;
