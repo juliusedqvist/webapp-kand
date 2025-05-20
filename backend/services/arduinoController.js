@@ -35,6 +35,23 @@ for (const path of candidates) {
   });
 }
 
+function sendBroadcastCommand(command) {
+  for (const [path, port] of Object.entries(ports)) {
+    if (!port.writable) {
+      console.warn(`Port ${path} is not writable`);
+      continue;
+    }
+
+    port.write(command + '\n', (err) => {
+      if (err) {
+        console.error(`Failed to send command to ${path}:`, err.message);
+      } else {
+        console.log(`Broadcast command sent to ${path}: ${command}`);
+      }
+    });
+  }
+}
+
 function sendToArduino(id, command) {
   return new Promise((resolve, reject) => {
     const port = idToPort[id];
@@ -73,4 +90,5 @@ function sendToArduino(id, command) {
 
 module.exports = {
   sendToArduino,
+  sendBroadcastCommand
 };

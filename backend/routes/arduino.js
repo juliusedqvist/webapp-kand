@@ -1,7 +1,7 @@
 // routes/arduino.js
 const express = require('express');
 const router = express.Router();
-const { sendToArduino } = require('../services/arduinoController');
+const { sendBroadcastCommand, sendToArduino } = require('../services/arduinoController');
 
 const position_reference = {
   B1_pickup: [[10000, 1], [4000, 0], [30000, 2], ["RESET", 0]],
