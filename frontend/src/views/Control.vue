@@ -160,7 +160,7 @@ async function sendCommand(command, responseWanted = false) {
   const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
   if (responseWanted){
   console.log("Response from backend:", res.data)
-  log(res.data, 'info')
+  log(`System response: ${res.data}`, 'info')
 }
 }
 
