@@ -15,7 +15,7 @@
 
 
 #ifndef DEVICE_ID
-#define DEVICE_ID 0 // fallback ID
+#define DEVICE_ID 2 // fallback ID
 #endif
 
 
@@ -63,7 +63,7 @@ float P = 0.0003;
 float I = 0.000000005;//.00000025;
 float D = 0;//.085;
 float generalSpeedFactor = 0.85;
-int forwardsMargin = 225;
+int forwardsMargin = 225; //1mm
 int backwardsMargin = 225;
 
 
@@ -176,6 +176,7 @@ void loop() {
    
    
       if(1000*derivative < 250){
+		  Serial.println("Antistuck action");
         if(abs(locationNumber - targetLocationNumber) < 6000){
           if(locationNumber > targetLocationNumber){
             antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);

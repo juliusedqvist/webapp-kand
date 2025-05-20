@@ -14,7 +14,7 @@
 
 
 #ifndef DEVICE_ID
-#define DEVICE_ID 0 // fallback ID
+#define DEVICE_ID 1 // fallback ID
 #endif
 
 
@@ -58,7 +58,7 @@ long targetLocationNumber = 0;
 
 
 float P = 0.0003;
-float I = 0;//.000000005;//.00000025;
+float I = 0.0000000015;//.00000025;
 float D = 0.085;
 float generalSpeedFactor = 0.6; //0.8
 int forwardsMargin = 10;
@@ -172,7 +172,7 @@ void loop() {
 
 
 	  if(1000*derivative < 250){
-		if(abs(locationNumber - targetLocationNumber) < 1000){
+		if(abs(locationNumber - targetLocationNumber) < 2000){
 		  if(locationNumber > targetLocationNumber){
 			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
 		  } else{
