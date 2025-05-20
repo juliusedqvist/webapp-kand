@@ -158,11 +158,16 @@ async function runNextAction() {
 async function sendCommand(command, responseWanted = false) {
   console.log("Sending command:", command);
   const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
-  if (responseWanted){
-  console.log("Response from backend:", res.data.received)
-  log(`System response (received added): ${res.data.received}`, 'info')
+
+  if (responseWanted) {
+    const received = res.data.received;
+
+    // Pretty print the received data
+    console.log("Response from backend:", JSON.stringify(received, null, 2));
+    log(`System response (received added): ${JSON.stringify(received)}`, 'info');
+  }
 }
-}
+
 
 
 async function logCommand(command, sendCommand = true) {
