@@ -176,7 +176,7 @@ void loop() {
    
    
       if(1000*derivative < 250){
-		  Serial.println("Antistuck action");
+		//  Serial.println("Antistuck action");
         if(abs(locationNumber - targetLocationNumber) < 6000){
           if(locationNumber > targetLocationNumber){
             antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
