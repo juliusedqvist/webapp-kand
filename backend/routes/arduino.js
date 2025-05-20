@@ -9,7 +9,8 @@ const position_reference = {
   RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
   RESUME: "RESUME",
-  REQUEST_POS: [["REQUEST_POS", 0], ["REQUEST_POS", 1], ["REQUEST_POS", 2]]
+  // REQUEST_POS: [["REQUEST_POS", 0], ["REQUEST_POS", 1], ["REQUEST_POS", 2]]
+  REQUEST_POS: "REQUEST_POS"
 }
 
 router.post('/command', async (req, res) => {

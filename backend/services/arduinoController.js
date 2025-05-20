@@ -52,7 +52,7 @@ function sendToArduino(id, command) {
       const trimmed = data.trim().toLowerCase();
       console.log(`Response from Arduino ID ${id}: ${trimmed}`);
 
-      if (trimmed === 'done' || trimmed === 'fuck' || trimmed.toLowerCase().includes("current")) {
+      if (trimmed === 'done' || trimmed === 'fuck') {
         parser.off('data', onData);
         resolve(trimmed);
       }
@@ -68,12 +68,6 @@ function sendToArduino(id, command) {
         console.log(`Command sent to Arduino ID ${id}: ${command}`);
       }
     });
-
-    // Timeout in case of no response
-    setTimeout(() => {
-      parser.off('data', onData);
-      reject(new Error('Timeout waiting for Arduino response'));
-    }, 25000);
   });
 }
 
