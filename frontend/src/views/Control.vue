@@ -162,18 +162,27 @@ async function sendCommand(command, responseWanted = false) {
   if (responseWanted) {
     const received = res.data.received;
 
+    // ID to name mapping
+    const idNameMap = {
+      ID2: 'Z-motor',
+      ID1: 'Theta-motor',
+      ID0: 'R-motor'
+    };
+
     // Extract and log id and response from each item
     if (Array.isArray(received)) {
       received.forEach((item, idx) => {
         const { id, response } = item;
-        console.log(`Item ${idx}: id=${id}, response=${response}`);
-        log(`System response: id=${id}, response=${response}`, 'info');
+        const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
+        console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
+        log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
       });
     } else {
       console.warn("Expected an array but got:", received);
     }
   }
 }
+
 
 
 
