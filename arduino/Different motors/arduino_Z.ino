@@ -169,8 +169,6 @@ void loop() {
 	if(missionIndex == 0){
 		digitalWrite(lockPin, LOW); //Turn the lock ON
 	} else if(missionIndex == 1){
-		Serial.print("Current position: ");
-		Serial.println(locationNumber);
 		digitalWrite(lockPin, HIGH); //Turn the lock OFF
       float e = targetLocationNumber - locationNumber;
       float derivative = (locationNumber - prevLocationNumber)/delayTime;
@@ -287,9 +285,9 @@ void loop() {
 
 void Feedb1INTERRUPT(){
   if(digitalRead(Feedb2) == HIGH){
-    locationNumber += 1;
-  } else{
     locationNumber -= 1;
+  } else{
+    locationNumber += 1;
   }
 }
 
