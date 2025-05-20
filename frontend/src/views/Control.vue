@@ -158,11 +158,33 @@ async function runNextAction() {
 async function sendCommand(command, responseWanted = false) {
   console.log("Sending command:", command);
   const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
-  if (responseWanted){
-  console.log("Response from backend:", res.data)
-  log(`System response: ${res.data}`, 'info')
+
+  if (responseWanted) {
+    const received = res.data.received;
+
+    // ID to name mapping
+    const idNameMap = {
+      2: 'Z-motor',
+      1: 'Theta-motor',
+      0: 'R-motor'
+    };
+
+    // Extract and log id and response from each item
+    if (Array.isArray(received)) {
+      received.forEach((item, idx) => {
+        const { id, response } = item;
+        const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
+        console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
+        log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
+      });
+    } else {
+      console.warn("Expected an array but got:", received);
+    }
+  }
 }
-}
+
+
+
 
 
 async function logCommand(command, sendCommand = true) {
