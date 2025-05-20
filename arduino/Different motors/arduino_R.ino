@@ -65,7 +65,7 @@ long targetLocationNumber = 0;
 float P = 0.00035;
 float I = 0.000000005;
 float D = 0.05;
-float generalSpeedFactor = 0.40; //0.45
+float generalSpeedFactor = 0.35; //0.45
 int forwardsMargin = 25;
 int backwardsMargin = 5;
 
