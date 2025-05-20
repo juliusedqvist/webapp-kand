@@ -73,7 +73,7 @@ float PWMFraction = 0.0;
 int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
-
+int debugNum = 0;
 
 
 
@@ -133,7 +133,9 @@ void loop() {
 		savedMissionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
-		Serial.println("stopped");
+		Serial.print("stopped");
+		Serial.print(debugNum);
+		debugNum = debugNum + 1;
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
       } else if(incomingCommand.equalsIgnoreCase("REQUEST_POS")){
