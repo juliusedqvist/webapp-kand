@@ -75,6 +75,10 @@ int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
 
+//used for detecting loose cables
+int locationNumberPreviousVarvInterrupt = locationNumber;
+int numberOfSusVarvInterrupts = 0;
+
 
 
 
