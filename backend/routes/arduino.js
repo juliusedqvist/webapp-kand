@@ -31,9 +31,7 @@ router.post('/command', async (req, res) => {
         await sendToArduino(cmd[1], cmd[0]);
       }
     } else if (typeof commands === 'string') {
-      sendToArduino(0, commands);
-      sendToArduino(1, commands);
-      sendToArduino(2, commands);
+      sendBroadcastCommand(commands);
     } else {
       throw new Error(`Invalid command format for key: ${command}`);
     }
