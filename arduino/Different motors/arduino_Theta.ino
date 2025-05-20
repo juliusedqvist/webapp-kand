@@ -286,6 +286,6 @@ void Feedb1INTERRUPT(){
 
 
 void FeedbVarvINTERRUPT(){
-  locationNumber = round(locationNumber/1000.0)*1000.0;
+  //locationNumber = round(locationNumber/1000.0)*1000.0;
 }
 

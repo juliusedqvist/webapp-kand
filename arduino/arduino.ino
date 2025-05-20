@@ -140,7 +140,7 @@ void loop() {
         missionIndex = savedMissionIndex;
       } else if(incomingCommand.equalsIgnoreCase("REQUEST_POS")){
         Serial.print("Current position: ");
-        Serial.println(locationNumber + 100);
+        Serial.println(locationNumber);
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
@@ -277,12 +277,11 @@ void loop() {
 
 
 void Feedb1INTERRUPT(){
-	locationNumber += 10;
-/*  if(digitalRead(Feedb2) == HIGH){
+  if(digitalRead(Feedb2) == HIGH){
     locationNumber -= 1;
   } else{
     locationNumber += 1;
-  }*/
+  }
 }
 
 
