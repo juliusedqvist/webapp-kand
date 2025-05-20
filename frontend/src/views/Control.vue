@@ -66,9 +66,10 @@
         <div class="panel-header">Commands</div>
         <div class="btn-display">
           <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP', false);sendCommand('STOP')">STOP</button>
-          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET', false);sendCommand('RESET')">RESET</button>
+          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET', false);sendCommand('RESET', true)">RESET</button>
           <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME', false);sendCommand('RESUME')">RESUME</button>
           <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN NEXT</button>
+          <button class="panel-btn" style="background-color: #004073; color: white;" @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
         </div>
       </div>
       <div class="next-action-panel">
@@ -154,9 +155,13 @@ async function runNextAction() {
 }
 
 // Reusable helper for sending commands
-async function sendCommand(command) {
+async function sendCommand(command, responseWanted = false) {
   console.log("Sending command:", command);
-  await axios.post('http://localhost:3000/api/arduino/command', { command });
+  const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
+  if (responseWanted){
+  console.log("Response from backend:", res)
+  log(res, 'info')
+}
 }
 
 
@@ -167,6 +172,7 @@ async function logCommand(command, sendCommand = true) {
         const res = await axios.post('http://localhost:3000/api/arduino/command', {
           command: nextAction.value
         });
+        console.log("Response from backend:", res)
 
       } catch (err) {
         const msg = err.response?.data?.error || err.message || 'Unknown error';
@@ -428,6 +434,10 @@ watch(
 
 .log-entry.warning {
   color: #b8860b;
+}
+
+.log-entry.response {
+  color: #068f11;
 }
 
 .log-entry.error {
