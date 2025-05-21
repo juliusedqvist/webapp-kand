@@ -6,6 +6,8 @@ const { sendBroadcastCommand, sendToArduino } = require('../services/arduinoCont
 const position_reference = {
   B1_pickup: [[10000, 1], [4000, 0], [30000, 2], ["RESET", 0]],
   A1_leave: [[20000, 1], [4000, 0], [30000, 2], ["RESET", 0]],
+  B2_pickup: [[7150, 1], [39723, 0], [10000, 2]],
+  B3_pickup: [[10000, 2]],
   RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
   RESUME: "RESUME",
@@ -51,7 +53,6 @@ router.post('/command', async (req, res) => {
     res.status(500).json({ error: 'Failed to send command', details: err.message });
   }
 });
-
 
 module.exports = router;
 
