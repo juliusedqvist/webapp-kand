@@ -62,10 +62,10 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.00045;//0.00035;
-float I = 0.000000005;
-float D = 0.09;//0.07;
-float generalSpeedFactor = 0.35; //0.45
+float P = 0.00025;//0.00035;
+float I = 0;//.000000005;
+float D = 0.04;//0.07;
+float generalSpeedFactor = 0.45; //0.45
 int16_t forwardsMargin = 25;
 int16_t backwardsMargin = 5;
 
@@ -176,15 +176,19 @@ void loop() {
 	if(missionIndex == 1){
 	  float e = targetLocationNumber - locationNumber;
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
-	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+	  if(e > 0) speedNDir = 0.6;
+	  if(e < 0) speedNDir = -0.6;
+	  
+	  if(abs(e) < 1000 && antistuckCurrentPWMBonus != 0) speedNDir = antistuckCurrentPWMBonus;
+//	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
 	  if(1000*derivative < 250){
 		if(abs(locationNumber - targetLocationNumber) < 1000){
 		  if(locationNumber > targetLocationNumber){
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.15*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
 		  } else{
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.15*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
 		  }
 		}
 	  }
