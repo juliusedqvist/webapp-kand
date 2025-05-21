@@ -189,61 +189,62 @@ async function sendCommand(command, responseWanted = false) {
       }
     }
   }
+}
 
 
 
 
 
-  async function logCommand(command, sendCommand = true) {
-    log(command, 'info')
-    if (sendCommand) {
-      try {
-        const res = await axios.post('http://localhost:3000/api/arduino/command', {
-          command: nextAction.value
-        });
-        console.log("Response from backend:", res)
+async function logCommand(command, sendCommand = true) {
+  log(command, 'info')
+  if (sendCommand) {
+    try {
+      const res = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: nextAction.value
+      });
+      console.log("Response from backend:", res)
 
-      } catch (err) {
-        const msg = err.response?.data?.error || err.message || 'Unknown error';
-      }
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Unknown error';
     }
   }
+}
 
-  function log(message, type = 'info') {
-    const now = new Date()
-    const time = `${now.toLocaleDateString("sv-SE")} ${now.toLocaleTimeString("sv-SE")}`
-    logs.value.push({ message: `[${time}] ${message}`, type })
+function log(message, type = 'info') {
+  const now = new Date()
+  const time = `${now.toLocaleDateString("sv-SE")} ${now.toLocaleTimeString("sv-SE")}`
+  logs.value.push({ message: `[${time}] ${message}`, type })
 
-    // Trim if over max
-    if (logs.value.length > maxLogEntries) {
-      logs.value.splice(0, logs.value.length - maxLogEntries)
-    }
-
-    // Persist
-    localStorage.setItem('logs', JSON.stringify(logs.value))
-
-    console.log(`[${type.toUpperCase()}] ${message}`)
+  // Trim if over max
+  if (logs.value.length > maxLogEntries) {
+    logs.value.splice(0, logs.value.length - maxLogEntries)
   }
 
+  // Persist
+  localStorage.setItem('logs', JSON.stringify(logs.value))
 
-  function confirmClearLog() {
-    if (confirm("Are you sure you want to clear the log?")) {
-      logs.value = []
-      localStorage.removeItem('logs')
-    }
+  console.log(`[${type.toUpperCase()}] ${message}`)
+}
+
+
+function confirmClearLog() {
+  if (confirm("Are you sure you want to clear the log?")) {
+    logs.value = []
+    localStorage.removeItem('logs')
   }
+}
 
 
-  watch(
-    logs,
-    async () => {
-      await nextTick()
-      if (logBox.value) {
-        logBox.value.scrollTop = logBox.value.scrollHeight
-      }
-    },
-    { deep: true }
-  )
+watch(
+  logs,
+  async () => {
+    await nextTick()
+    if (logBox.value) {
+      logBox.value.scrollTop = logBox.value.scrollHeight
+    }
+  },
+  { deep: true }
+)
 </script>
 
 
