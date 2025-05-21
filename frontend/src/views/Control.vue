@@ -51,29 +51,16 @@
       <div class="next-action-panel">
         <div class="panel-header">Commands</div>
         <div class="btn-display">
-          <<<<<<< HEAD <button class="panel-btn"
-            style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;"
+          <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;"
             @click="logCommand('STOP', false); sendCommand('STOP')">STOP</button>
-            <button class="panel-btn" style="background-color: #f9cb00; color: white;"
-              @click="logCommand('RESET', false); sendCommand('RESET', true)">RESET</button>
-            <button class="panel-btn" style="background-color: #4cd000; color: white;"
-              @click="logCommand('RESUME', false); sendCommand('RESUME')">RESUME</button>
-            <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN
-              NEXT</button>
-            <button class="panel-btn" style="background-color: #004073; color: white;"
-              @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
-            =======
-            <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;"
-              @click="logCommand('STOP', false); sendCommand('STOP')">STOP</button>
-            <button class="panel-btn" style="background-color: #f9cb00; color: white;"
-              @click="logCommand('RESET', false); sendCommand('RESET')">RESET</button>
-            <button class="panel-btn" style="background-color: #4cd000; color: white;"
-              @click="logCommand('RESUME', false); sendCommand('RESUME')">RESUME</button>
-            <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN
-              NEXT</button>
-            <button class="panel-btn" style="background-color: #004073; color: white;"
-              @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
-            >>>>>>> cb74d2de18cc2f0cb9ad631fe0ed719072f0dcb4
+          <button class="panel-btn" style="background-color: #f9cb00; color: white;"
+            @click="logCommand('RESET', false); sendCommand('RESET')">RESET</button>
+          <button class="panel-btn" style="background-color: #4cd000; color: white;"
+            @click="logCommand('RESUME', false); sendCommand('RESUME')">RESUME</button>
+          <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN
+            NEXT</button>
+          <button class="panel-btn" style="background-color: #004073; color: white;"
+            @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
         </div>
       </div>
       <div class="next-action-panel">
