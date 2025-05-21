@@ -161,92 +161,90 @@ async function runNextAction() {
 async function sendCommand(command, responseWanted = false) {
   console.log("Sending command:", command);
   const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
-<<<<<<< HEAD
   if (responseWanted) {
     console.log("Response from backend:", res)
     log(res, 'info')
-=======
 
-  if (responseWanted) {
-    const received = res.data.received;
+    if (responseWanted) {
+      const received = res.data.received;
 
-    // ID to name mapping
-    const idNameMap = {
-      2: 'Z-motor',
-      1: 'Theta-motor',
-      0: 'R-motor'
-    };
+      // ID to name mapping
+      const idNameMap = {
+        2: 'Z-motor',
+        1: 'Theta-motor',
+        0: 'R-motor'
+      };
 
-    // Extract and log id and response from each item
-    if (Array.isArray(received)) {
-      received.forEach((item, idx) => {
-        const { id, response } = item;
-        const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
-        console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
-        // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
-        log(`${motorName}: ${response}`, 'info');
-      });
-    } else {
-      console.warn("Expected an array but got:", received);
-    }
+      // Extract and log id and response from each item
+      if (Array.isArray(received)) {
+        received.forEach((item, idx) => {
+          const { id, response } = item;
+          const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
+          console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
+          // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
+          log(`${motorName}: ${response}`, 'info');
+        });
+      } else {
+        console.warn("Expected an array but got:", received);
+      }
 >>>>>>> cb74d2de18cc2f0cb9ad631fe0ed719072f0dcb4
-  }
-}
-
-
-
-
-
-async function logCommand(command, sendCommand = true) {
-  log(command, 'info')
-  if (sendCommand) {
-    try {
-      const res = await axios.post('http://localhost:3000/api/arduino/command', {
-        command: nextAction.value
-      });
-      console.log("Response from backend:", res)
-
-    } catch (err) {
-      const msg = err.response?.data?.error || err.message || 'Unknown error';
     }
   }
-}
-
-function log(message, type = 'info') {
-  const now = new Date()
-  const time = `${now.toLocaleDateString("sv-SE")} ${now.toLocaleTimeString("sv-SE")}`
-  logs.value.push({ message: `[${time}] ${message}`, type })
-
-  // Trim if over max
-  if (logs.value.length > maxLogEntries) {
-    logs.value.splice(0, logs.value.length - maxLogEntries)
-  }
-
-  // Persist
-  localStorage.setItem('logs', JSON.stringify(logs.value))
-
-  console.log(`[${type.toUpperCase()}] ${message}`)
-}
 
 
-function confirmClearLog() {
-  if (confirm("Are you sure you want to clear the log?")) {
-    logs.value = []
-    localStorage.removeItem('logs')
-  }
-}
 
 
-watch(
-  logs,
-  async () => {
-    await nextTick()
-    if (logBox.value) {
-      logBox.value.scrollTop = logBox.value.scrollHeight
+
+  async function logCommand(command, sendCommand = true) {
+    log(command, 'info')
+    if (sendCommand) {
+      try {
+        const res = await axios.post('http://localhost:3000/api/arduino/command', {
+          command: nextAction.value
+        });
+        console.log("Response from backend:", res)
+
+      } catch (err) {
+        const msg = err.response?.data?.error || err.message || 'Unknown error';
+      }
     }
-  },
-  { deep: true }
-)
+  }
+
+  function log(message, type = 'info') {
+    const now = new Date()
+    const time = `${now.toLocaleDateString("sv-SE")} ${now.toLocaleTimeString("sv-SE")}`
+    logs.value.push({ message: `[${time}] ${message}`, type })
+
+    // Trim if over max
+    if (logs.value.length > maxLogEntries) {
+      logs.value.splice(0, logs.value.length - maxLogEntries)
+    }
+
+    // Persist
+    localStorage.setItem('logs', JSON.stringify(logs.value))
+
+    console.log(`[${type.toUpperCase()}] ${message}`)
+  }
+
+
+  function confirmClearLog() {
+    if (confirm("Are you sure you want to clear the log?")) {
+      logs.value = []
+      localStorage.removeItem('logs')
+    }
+  }
+
+
+  watch(
+    logs,
+    async () => {
+      await nextTick()
+      if (logBox.value) {
+        logBox.value.scrollTop = logBox.value.scrollHeight
+      }
+    },
+    { deep: true }
+  )
 </script>
 
 
