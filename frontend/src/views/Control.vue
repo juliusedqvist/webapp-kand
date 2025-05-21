@@ -187,7 +187,6 @@ async function sendCommand(command, responseWanted = false) {
       } else {
         console.warn("Expected an array but got:", received);
       }
->>>>>>> cb74d2de18cc2f0cb9ad631fe0ed719072f0dcb4
     }
   }
 
