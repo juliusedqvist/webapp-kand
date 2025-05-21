@@ -48,7 +48,7 @@ int32_t longagoPositionOne = locationNumber; //0 to 1.5s ago
 int32_t longagoPositionTwo = locationNumber; //1.5 to 3s ago
 int32_t longagoPositionThree = locationNumber; //3 to 4.5s ago
 int16_t loopsPerLongagoPositionUpdate = 1500/delayTime;
-int16_t counter = 0;
+int32_t counter = 0;
 
 
 int32_t targetLocationNumber = 0;
@@ -62,9 +62,9 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.00025;//0.00035;
+float P = 0.002;//0.00035; //HUGE
 float I = 0;//.000000005;
-float D = 0.04;//0.07;
+float D = 0.075;//0.07;
 float generalSpeedFactor = 0.45; //0.45
 int16_t forwardsMargin = 25;
 int16_t backwardsMargin = 5;
@@ -83,6 +83,8 @@ int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing sti
 //used for detecting loose cables
 int16_t locationNumberPreviousVarvInterrupt = locationNumber;
 int16_t numberOfSusVarvInterrupts = 0;
+int16_t currentTravelDirectionTracker = 0;
+int16_t timeLastDirectionSwap = counter;
 
 
 
@@ -144,6 +146,7 @@ void loop() {
 		Serial.println("stopped");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
+		timeLastDirectionSwap = counter;
       } else if(incomingCommand.equalsIgnoreCase("REQUEST_POS")){
         Serial.print("Current position: ");
         Serial.println(locationNumber);
@@ -151,6 +154,7 @@ void loop() {
         missionIndex = 1;
 		savedMissionIndex = 1;
         targetLocationNumber = atol(incomingCommand.c_str());
+		timeLastDirectionSwap = counter;
       }
 
 
@@ -225,17 +229,31 @@ void loop() {
 	  }
 	 
 	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-	  if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
+	  if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
-		Serial.println("fuck");
-		//GRAB
-		//REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
-		//REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
+		Serial.println("fuck : veryStuck");  //Can be caused by loose cables or misplaced samples
 	  }
 
 
+
+		if(speedNDir < 0 && currentTravelDirectionTracker != -1){
+		  timeLastDirectionSwap = counter;
+		  currentTravelDirectionTracker = -1;
+		}
+		if(speedNDir > 0 && currentTravelDirectionTracker != 1){
+		  timeLastDirectionSwap = counter;
+		  currentTravelDirectionTracker = 1;
+		}
+		if(speedNDir == 0 && currentTravelDirectionTracker != 0){
+		  timeLastDirectionSwap = counter;
+		  currentTravelDirectionTracker = 0;
+		}
+		if(timeLastDirectionSwap - counter > 9000/delayTime){
+			missionIndex = 0;
+			Serial.println("fuck : takesTooLong");
+		}
 
 
 	 
@@ -256,10 +274,11 @@ void loop() {
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		numberOfSusVarvInterrupts = 0;
+		timeLastDirectionSwap = counter;
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -0.6;
+		speedNDir = -1;
 	  }
 	}
 
@@ -312,7 +331,7 @@ void FeedbVarvINTERRUPT(){
 		numberOfSusVarvInterrupts += 1;
 		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
 			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
-			Serial.println("fuck :VarvInterruptSpam");
+			Serial.println("fuck : varvInterruptSpam");
 			missionIndex = 0;
 		}
 	}
