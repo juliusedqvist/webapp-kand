@@ -26,10 +26,10 @@ String incomingCommand = "";
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int missionIndex = 0;
+int16_t missionIndex = 0;
 
 //used for resume
-int savedMissionIndex = 0;
+int16_t savedMissionIndex = 0;
 
 
 
@@ -39,16 +39,16 @@ int savedMissionIndex = 0;
 float delayTime = 20.0;
 
 
-volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
-long prevLocationNumber = locationNumber;
-long longagoPositionOne = locationNumber; //0 to 2s ago
-long longagoPositionTwo = locationNumber; //2 to 4s ago
-long longagoPositionThree = locationNumber; //4 to 6s ago
-int loopsPerLongagoPositionUpdate = 2000/delayTime;
-int counter = 0;
+volatile int32_t locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
+int32_t prevLocationNumber = locationNumber;
+int32_t longagoPositionOne = locationNumber; //0 to 2s ago
+int32_t longagoPositionTwo = locationNumber; //2 to 4s ago
+int32_t longagoPositionThree = locationNumber; //4 to 6s ago
+int16_t loopsPerLongagoPositionUpdate = 2000/delayTime;
+int16_t counter = 0;
 
 
-long targetLocationNumber = 0;
+int32_t targetLocationNumber = 0;
 
 
 
@@ -63,21 +63,21 @@ float P = 0.0003;
 float I = 0.000000005;//.00000025;
 float D = 0;//.085;
 float generalSpeedFactor = 0.85;
-int forwardsMargin = 225; //1mm
-int backwardsMargin = 225;
+int16_t forwardsMargin = 225; //1mm
+int16_t backwardsMargin = 225;
 
 
 float antistuckCurrentPWMBonus = 0;
 float integral = 0;
 
 float PWMFraction = 0.0;
-int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
+int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
 
 //used for detecting loose cables
-int locationNumberPreviousVarvInterrupt = locationNumber;
-int numberOfSusVarvInterrupts = 0;
+int16_t locationNumberPreviousVarvInterrupt = locationNumber;
+int16_t numberOfSusVarvInterrupts = 0;
 
 
 
@@ -147,7 +147,7 @@ void loop() {
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
-        targetLocationNumber = atoi(incomingCommand.c_str());
+        targetLocationNumber = atol(incomingCommand.c_str());
       }
 
 

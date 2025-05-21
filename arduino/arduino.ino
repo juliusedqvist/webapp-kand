@@ -3,33 +3,36 @@
 
 
 
-#define DriveF 10
-#define DriveB 9
+#define DriveF 9
+#define DriveB 10
 #define Feedb1 2 //The motors channel B, I think. It is synchronius with channel Z
 #define Feedb2 5 //The motors channel A, I think
 #define FeedbVarv 3 //The motors channel Z
-#define FeedbHitEnd A5
-#define lockPin 8
+#define FeedbHitEnd 4
 
 
 
 
 #ifndef DEVICE_ID
-#define DEVICE_ID 2 // fallback ID
+#define DEVICE_ID 0 // fallback ID
 #endif
+
+
 
 
 char buffer[64];
 String incomingCommand = "";
 
 
+
+
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int missionIndex = 0;
+int16_t missionIndex = 0;
 
 //used for resume
-int savedMissionIndex = 0;
+int16_t savedMissionIndex = 0;
 
 
 
@@ -39,19 +42,16 @@ int savedMissionIndex = 0;
 float delayTime = 20.0;
 
 
-volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
-long prevLocationNumber = locationNumber;
-long longagoPositionOne = locationNumber; //0 to 2s ago
-long longagoPositionTwo = locationNumber; //2 to 4s ago
-long longagoPositionThree = locationNumber; //4 to 6s ago
-int loopsPerLongagoPositionUpdate = 2000/delayTime;
-int counter = 0;
+volatile int32_t locationNumber = 0; //Goes from 0 to somewhere between 10k and 20k
+int32_t prevLocationNumber = locationNumber;
+int32_t longagoPositionOne = locationNumber; //0 to 1.5s ago
+int32_t longagoPositionTwo = locationNumber; //1.5 to 3s ago
+int32_t longagoPositionThree = locationNumber; //3 to 4.5s ago
+int16_t loopsPerLongagoPositionUpdate = 1500/delayTime;
+int16_t counter = 0;
 
 
-long targetLocationNumber = 0;
-
-
-
+int32_t targetLocationNumber = 0;
 
 
 
@@ -59,25 +59,30 @@ long targetLocationNumber = 0;
 
 
 
-float P = 0.0003;
-float I = 0.000000005;//.00000025;
-float D = 0;//.085;
-float generalSpeedFactor = 0.85;
-int forwardsMargin = 225; //1mm
-int backwardsMargin = 225;
+
+
+
+float P = 0.00035;
+float I = 0.000000005;
+float D = 0.07;
+float generalSpeedFactor = 0.35; //0.45
+int16_t forwardsMargin = 25;
+int16_t backwardsMargin = 5;
+
 
 
 float antistuckCurrentPWMBonus = 0;
 float integral = 0;
 
 float PWMFraction = 0.0;
-int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
+int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
+
 
 
 
 //used for detecting loose cables
-int locationNumberPreviousVarvInterrupt = locationNumber;
-int numberOfSusVarvInterrupts = 0;
+int16_t locationNumberPreviousVarvInterrupt = locationNumber;
+int16_t numberOfSusVarvInterrupts = 0;
 
 
 
@@ -93,13 +98,11 @@ void setup() {
   pinMode(Feedb1, INPUT);
   pinMode(Feedb2, INPUT);
   pinMode(FeedbVarv, INPUT);
-  pinMode(FeedbHitEnd, INPUT);
-  pinMode(lockPin, OUTPUT);
+  pinMode(FeedbHitEnd, INPUT_PULLUP);
 
 
 
 
-  pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(13, OUTPUT); //Permanently high
@@ -147,9 +150,8 @@ void loop() {
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
-        targetLocationNumber = atoi(incomingCommand.c_str());
+        targetLocationNumber = atol(incomingCommand.c_str());
       }
-
 
 
       incomingCommand = ""; // Reset buffer
@@ -169,101 +171,93 @@ void loop() {
   }
 
 
-	float speedNDir = 0;
-	if(missionIndex == 0){
-		digitalWrite(lockPin, LOW); //Turn the lock ON
-	} else if(missionIndex == 1){
-		digitalWrite(lockPin, HIGH); //Turn the lock OFF
-      float e = targetLocationNumber - locationNumber;
-      float derivative = (locationNumber - prevLocationNumber)/delayTime;
-      speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
-   
-   
-      if(1000*derivative < 250){
-		//  Serial.println("Antistuck action");
-        if(abs(locationNumber - targetLocationNumber) < 6000){
-          if(locationNumber > targetLocationNumber){
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
-          } else{
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
-          }
-        }
-      }
-      if(abs(locationNumber - targetLocationNumber) > 8000){
-        antistuckCurrentPWMBonus = 0;
-      }
-     
-	 
-	  //If we pass the goal, we're done. Turn the lock on asap and then declare that we're done.
-      if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
-        missionIndex = 0;
-		speedNDir = 0;
-		savedMissionIndex = 0;
-		numberOfSusVarvInterrupts = 0;
-		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
-		Serial.println("done");
-      }
-      if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
-        missionIndex = 0;
-		speedNDir = 0;
-		savedMissionIndex = 0;
-		numberOfSusVarvInterrupts = 0;
-		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
-		Serial.println("done");
-      }
+  float speedNDir = 0;
+  
+	if(missionIndex == 1){
+	  float e = targetLocationNumber - locationNumber;
+	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
+	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
-/*
-      //If we are standing still and at the correct location:
-      if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
-        missionIndex = 0;
+
+	  if(1000*derivative < 250){
+		if(abs(locationNumber - targetLocationNumber) < 1000){
+		  if(locationNumber > targetLocationNumber){
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+		  } else{
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+		  }
+		}
+	  }
+	  if(abs(locationNumber - targetLocationNumber) > 2000){
+		antistuckCurrentPWMBonus = 0;
+	  }
+	 
+	  if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
+		speedNDir = 0;
+		integral = 0;
+		antistuckCurrentPWMBonus = 0;
+	  }
+	  if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
+		speedNDir = 0;
+		integral = 0;
+		antistuckCurrentPWMBonus = 0;
+	  }
+
+
+	  //If we are standing still and at the correct location:
+	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
+		missionIndex = 0;
 		savedMissionIndex = 0;
-		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
-      }
-  */   
-      //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1000)){
-        missionIndex = 0;
+	  }
+	 
+	  //If we are stuck against something but very close to target location, react quickly:
+	  if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
+		missionIndex = 0;
+		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
+		Serial.println("done");
+	  }
+	 
+	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
+	  if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
+		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
 		Serial.println("fuck");
-        //GRAB
-        //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
-        //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
-      }
+		//GRAB
+		//REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
+		//REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
+	  }
 
 
 
 
-     
-      if(prevLocationNumber != locationNumber){
-        integral = integral + e*delayTime;
-      }
-      prevLocationNumber = locationNumber;
+	 
+	  if(prevLocationNumber != locationNumber){
+		integral = integral + e*delayTime;
+	  }
+	  prevLocationNumber = locationNumber;
 
 
-    } else if(missionIndex == 2){
-      if(analogRead(FeedbHitEnd) > 150){
-        missionIndex = 0;
+	} else if(missionIndex == 2){
+	  if(digitalRead(FeedbHitEnd) == LOW){
+		missionIndex = 0;
 		savedMissionIndex = 0;
-        locationNumber = 0;
-        integral = 0;
-        antistuckCurrentPWMBonus = 0;
+		locationNumber = 0;
+		integral = 0;
+		antistuckCurrentPWMBonus = 0;
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
         speedNDir = 0;
-
-		digitalWrite(lockPin, LOW); //Turn the lock ON
-      } else{
-
-		digitalWrite(lockPin, HIGH); //Turn the lock OFF
-        speedNDir = -0.4;
-      }
-    }
-
+	  } else{
+		speedNDir = -0.6;
+	  }
+	}
 
  
 
@@ -301,9 +295,9 @@ void loop() {
 
 void Feedb1INTERRUPT(){
   if(digitalRead(Feedb2) == HIGH){
-    locationNumber -= 1;
-  } else{
     locationNumber += 1;
+  } else{
+    locationNumber -= 1;
   }
 }
 
