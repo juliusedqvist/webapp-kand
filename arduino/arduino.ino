@@ -62,7 +62,7 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.00045//0.00035;
+float P = 0.00045;//0.00035;
 float I = 0.000000005;
 float D = 0.09;//0.07;
 float generalSpeedFactor = 0.35; //0.45
