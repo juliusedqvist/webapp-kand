@@ -80,6 +80,11 @@ int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
 
+//used for detecting loose cables
+int locationNumberPreviousVarvInterrupt = locationNumber;
+int numberOfSusVarvInterrupts = 0;
+
+
 
 
 // put function declarations here:
@@ -203,6 +208,7 @@ void loop() {
 	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
 		missionIndex = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
 	  }
 	 
@@ -210,6 +216,7 @@ void loop() {
 	  if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
 		missionIndex = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
 	  }
 	 
@@ -217,6 +224,7 @@ void loop() {
 	  if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 150)){
 		missionIndex = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("fuck");
 		//GRAB
 		//REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
@@ -243,6 +251,7 @@ void loop() {
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
@@ -294,7 +303,15 @@ void Feedb1INTERRUPT(){
 
 
 void FeedbVarvINTERRUPT(){
-  locationNumber = round(locationNumber/1000.0)*1000.0;
+	locationNumber = round(locationNumber/1000.0)*1000.0;
+	if(locationNumber - locationNumberPreviousVarvInterrupt < 200){
+		numberOfSusVarvInterrupts += 1;
+		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
+			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
+			Serial.println("fuck :VarvInterruptSpam");
+			missionIndex = 0;
+		}
+	}
+	locationNumberPreviousVarvInterrupt = locationNumber;
 }
-
 

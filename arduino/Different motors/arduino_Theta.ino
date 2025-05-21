@@ -36,9 +36,6 @@ int savedMissionIndex = 0;
 
 
 
-
-
-
 float delayTime = 20.0;
 
 volatile long locationNumber = 0; //Goes from 0 to like, 40-50k or smth
@@ -73,7 +70,11 @@ float PWMFraction = 0.0;
 int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
-int debugNum = 0;
+
+//used for detecting loose cables
+int locationNumberPreviousVarvInterrupt = locationNumber;
+int numberOfSusVarvInterrupts = 0;
+
 
 
 
@@ -133,9 +134,7 @@ void loop() {
 		savedMissionIndex = 2;
       } else if(incomingCommand.equalsIgnoreCase("STOP")){
         missionIndex = 0;
-		Serial.print("stopped");
-		Serial.println(debugNum);
-		debugNum = debugNum + 1;
+		Serial.println("stopped");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
       } else if(incomingCommand.equalsIgnoreCase("REQUEST_POS")){
@@ -202,6 +201,7 @@ void loop() {
 	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
 		missionIndex = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
 	  }
 	 
@@ -209,6 +209,7 @@ void loop() {
 	  if((antistuckCurrentPWMBonus >= 1 && abs(locationNumber-longagoPositionThree) < 100)){
 		missionIndex = 0;
 		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("fuck");
 		//GRAB
 		//REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
@@ -238,6 +239,7 @@ void loop() {
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
+		numberOfSusVarvInterrupts = 0;
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
@@ -286,6 +288,15 @@ void Feedb1INTERRUPT(){
 
 
 void FeedbVarvINTERRUPT(){
-  //locationNumber = round(locationNumber/1000.0)*1000.0;
+	locationNumber = round(locationNumber/1000.0)*1000.0;
+	if(locationNumber - locationNumberPreviousVarvInterrupt < 200){
+		numberOfSusVarvInterrupts += 1;
+		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
+			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
+			Serial.println("fuck :VarvInterruptSpam");
+			missionIndex = 0;
+		}
+	}
+	locationNumberPreviousVarvInterrupt = locationNumber;
 }
 

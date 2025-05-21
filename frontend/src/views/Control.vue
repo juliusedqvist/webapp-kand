@@ -51,16 +51,29 @@
       <div class="next-action-panel">
         <div class="panel-header">Commands</div>
         <div class="btn-display">
-          <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;"
+          <<<<<<< HEAD <button class="panel-btn"
+            style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;"
             @click="logCommand('STOP', false); sendCommand('STOP')">STOP</button>
-          <button class="panel-btn" style="background-color: #f9cb00; color: white;"
-            @click="logCommand('RESET', false); sendCommand('RESET', true)">RESET</button>
-          <button class="panel-btn" style="background-color: #4cd000; color: white;"
-            @click="logCommand('RESUME', false); sendCommand('RESUME')">RESUME</button>
-          <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN
-            NEXT</button>
-          <button class="panel-btn" style="background-color: #004073; color: white;"
-            @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
+            <button class="panel-btn" style="background-color: #f9cb00; color: white;"
+              @click="logCommand('RESET', false); sendCommand('RESET', true)">RESET</button>
+            <button class="panel-btn" style="background-color: #4cd000; color: white;"
+              @click="logCommand('RESUME', false); sendCommand('RESUME')">RESUME</button>
+            <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN
+              NEXT</button>
+            <button class="panel-btn" style="background-color: #004073; color: white;"
+              @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
+            =======
+            <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;"
+              @click="logCommand('STOP', false); sendCommand('STOP')">STOP</button>
+            <button class="panel-btn" style="background-color: #f9cb00; color: white;"
+              @click="logCommand('RESET', false); sendCommand('RESET')">RESET</button>
+            <button class="panel-btn" style="background-color: #4cd000; color: white;"
+              @click="logCommand('RESUME', false); sendCommand('RESUME')">RESUME</button>
+            <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN
+              NEXT</button>
+            <button class="panel-btn" style="background-color: #004073; color: white;"
+              @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
+            >>>>>>> cb74d2de18cc2f0cb9ad631fe0ed719072f0dcb4
         </div>
       </div>
       <div class="next-action-panel">
@@ -132,7 +145,7 @@ async function runNextAction() {
       await sendCommand(`RESET`);
     } else if (!toLocation) {
       await sendCommand(`${fromLocation}_pickup`);
-      // await sendCommand(`RESET`);
+      await sendCommand(`RESET`);
     } else {
       await sendCommand(`${fromLocation}_pickup`);
       await sendCommand(`${toLocation}_leave`);
@@ -148,11 +161,40 @@ async function runNextAction() {
 async function sendCommand(command, responseWanted = false) {
   console.log("Sending command:", command);
   const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
+<<<<<<< HEAD
   if (responseWanted) {
     console.log("Response from backend:", res)
     log(res, 'info')
+=======
+
+  if (responseWanted) {
+    const received = res.data.received;
+
+    // ID to name mapping
+    const idNameMap = {
+      2: 'Z-motor',
+      1: 'Theta-motor',
+      0: 'R-motor'
+    };
+
+    // Extract and log id and response from each item
+    if (Array.isArray(received)) {
+      received.forEach((item, idx) => {
+        const { id, response } = item;
+        const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
+        console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
+        // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
+        log(`${motorName}: ${response}`, 'info');
+      });
+    } else {
+      console.warn("Expected an array but got:", received);
+    }
+>>>>>>> cb74d2de18cc2f0cb9ad631fe0ed719072f0dcb4
   }
 }
+
+
+
 
 
 async function logCommand(command, sendCommand = true) {
