@@ -176,8 +176,8 @@ void loop() {
 	if(missionIndex == 1){
 	  float e = targetLocationNumber - locationNumber;
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
-	  if(e > 0) speedNDir = 0.6;
-	  if(e < 0) speedNDir = -0.6;
+	  if(e > 0) speedNDir = 0.5;
+	  if(e < 0) speedNDir = -0.5;
 	  
 	  if(abs(e) < 1000 && antistuckCurrentPWMBonus != 0) speedNDir = antistuckCurrentPWMBonus;
 //	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
