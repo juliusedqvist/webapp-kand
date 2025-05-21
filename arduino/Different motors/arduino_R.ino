@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <inttypes.h>
 
 
 
@@ -62,9 +62,9 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.00035;
+float P = 0.00045//0.00035;
 float I = 0.000000005;
-float D = 0.07;
+float D = 0.09;//0.07;
 float generalSpeedFactor = 0.35; //0.45
 int16_t forwardsMargin = 25;
 int16_t backwardsMargin = 5;
@@ -213,7 +213,7 @@ void loop() {
 	  }
 	 
 	  //If we are stuck against something but very close to target location, react quickly:
-	  if((abs(locationNumber - targetLocationNumber) < 100 && abs(locationNumber-longagoPositionTwo) < 25)){
+	  if((abs(locationNumber - targetLocationNumber) < 200 && abs(locationNumber-longagoPositionTwo) < 50)){
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
