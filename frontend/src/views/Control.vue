@@ -128,14 +128,14 @@ async function runNextAction() {
 
   try {
     if (fromLocation === toLocation) {
-      await sendCommand(`${toLocation}_leave`);
-      await sendCommand(`RESET`);
+      await sendCommand(`${toLocation}_leave`, true);
+      await sendCommand(`RESET`); 
     } else if (!toLocation) {
-      await sendCommand(`${fromLocation}_pickup`);
+      await sendCommand(`${fromLocation}_pickup`, true);
       await sendCommand(`RESET`);
     } else {
-      await sendCommand(`${fromLocation}_pickup`);
-      await sendCommand(`${toLocation}_leave`);
+      await sendCommand(`${fromLocation}_pickup`, true);
+      await sendCommand(`${toLocation}_leave`, true);
       await sendCommand(`RESET`);
     }
   } catch (err) {
