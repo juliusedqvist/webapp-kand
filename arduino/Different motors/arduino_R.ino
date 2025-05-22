@@ -229,12 +229,12 @@ void loop() {
 	  }
 	 
 	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-	  /*if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
+	  if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
 		Serial.println("fuck : veryStuck");  //Can be caused by loose cables or misplaced samples
-	  }*/
+	  }
 
 
 
@@ -250,7 +250,7 @@ void loop() {
 		  timeLastDirectionSwap = counter;
 		  currentTravelDirectionTracker = 0;
 		}
-		if(timeLastDirectionSwap - counter > 9000/delayTime){
+		if(counter - timeLastDirectionSwap > 9000/delayTime){
 			missionIndex = 0;
 			Serial.println("fuck : takesTooLong");
 		}
@@ -278,7 +278,7 @@ void loop() {
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -1;
+		speedNDir = -0.8;
 	  }
 	}
 
