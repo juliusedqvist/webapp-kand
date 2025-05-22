@@ -161,16 +161,11 @@ void loop() {
 
 
 
-  counter += 1;
-  if(counter % loopsPerLongagoPositionUpdate == 0){
-    longagoPositionThree = longagoPositionTwo;
-    longagoPositionTwo = longagoPositionOne;
-    longagoPositionOne = locationNumber;
-  }
 
 
   float speedNDir = 0;
 	if(missionIndex == 1){
+  
 	  float e = targetLocationNumber - locationNumber;
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
 	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
@@ -237,6 +232,12 @@ void loop() {
 		}
 
 	 
+	  counter += 1;
+	  if(counter % loopsPerLongagoPositionUpdate == 0){
+		longagoPositionThree = longagoPositionTwo;
+		longagoPositionTwo = longagoPositionOne;
+		longagoPositionOne = locationNumber;
+	  }
 	  if(prevLocationNumber != locationNumber){
 		integral = integral + e*delayTime;
 	  }

@@ -165,12 +165,6 @@ void loop() {
 
 
 
-  counter += 1;
-  if(counter % loopsPerLongagoPositionUpdate == 0){
-    longagoPositionThree = longagoPositionTwo;
-    longagoPositionTwo = longagoPositionOne;
-    longagoPositionOne = locationNumber;
-  }
 
 
 	float speedNDir = 0;
@@ -253,6 +247,12 @@ void loop() {
 		}
 
      
+	  counter += 1;
+	  if(counter % loopsPerLongagoPositionUpdate == 0){
+		longagoPositionThree = longagoPositionTwo;
+		longagoPositionTwo = longagoPositionOne;
+		longagoPositionOne = locationNumber;
+	  }
       if(prevLocationNumber != locationNumber){
         integral = integral + e*delayTime;
       }

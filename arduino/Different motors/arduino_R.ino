@@ -167,17 +167,11 @@ void loop() {
 
 
 
-  counter += 1;
-  if(counter % loopsPerLongagoPositionUpdate == 0){
-    longagoPositionThree = longagoPositionTwo;
-    longagoPositionTwo = longagoPositionOne;
-    longagoPositionOne = locationNumber;
-  }
-
 
   float speedNDir = 0;
   
 	if(missionIndex == 1){
+
 	  float e = targetLocationNumber - locationNumber;
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
 	  if(e > 0) speedNDir = 0.5;
@@ -252,11 +246,20 @@ void loop() {
 		}
 		if(counter - timeLastDirectionSwap > 9000/delayTime){
 			missionIndex = 0;
-			Serial.println("fuck : takesTooLong");
+			Serial.print("fuck : takesTooLong");
+			Serial.print(counter);
+			Serial.print("  ");
+			Serial.println(timeLastDirectionSwap);
 		}
 
 
 	 
+	  counter += 1;
+	  if(counter % loopsPerLongagoPositionUpdate == 0){
+		longagoPositionThree = longagoPositionTwo;
+		longagoPositionTwo = longagoPositionOne;
+		longagoPositionOne = locationNumber;
+	  }
 	  if(prevLocationNumber != locationNumber){
 		integral = integral + e*delayTime;
 	  }
