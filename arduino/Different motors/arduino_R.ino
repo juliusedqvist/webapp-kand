@@ -62,9 +62,9 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.002;//0.00035; //HUGE
+float P = 0.001;//0.00035; //HUGE
 float I = 0;//.000000005;
-float D = 0.075;//0.07;
+float D = 0.05;//0.07;
 float generalSpeedFactor = 0.45; //0.45
 int16_t forwardsMargin = 25;
 int16_t backwardsMargin = 5;

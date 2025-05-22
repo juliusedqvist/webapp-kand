@@ -59,7 +59,7 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.0003;
+float P = 0.003; //.0003
 float I = 0.000000005;//.00000025;
 float D = 0;//.085;
 float generalSpeedFactor = 0.85;
@@ -181,9 +181,9 @@ void loop() {
 		//  Serial.println("Antistuck action");
         if(abs(locationNumber - targetLocationNumber) < 6000){
           if(locationNumber > targetLocationNumber){
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.5*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
           } else{
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.5*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
           }
         }
       }
