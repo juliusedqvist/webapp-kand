@@ -6,70 +6,61 @@
         <img src="@/assets/Chambers.svg" class="robot-svg" />
 
         <!-- Chamber buttons A -->
-        <button
-          v-for="i in 24"
-          :key="'A' + i"
-          class="chamber-btn"
-          :style="{
-            top: i <= 12 ? '82.6%' : '93.3%',
-            left: `${6.3 + ((i - 1) % 12) * (66 / 11)}%`,
-            transform: 'translate(-50%, -50%)'
-          }"
-          @click="handleChamberClick(`A${i}`)"
-        >
+        <button v-for="i in 24" :key="'A' + i" class="chamber-btn" :style="{
+          top: i <= 12 ? '82.6%' : '93.3%',
+          left: `${6.3 + ((i - 1) % 12) * (66 / 11)}%`,
+          transform: 'translate(-50%, -50%)'
+        }" @click="handleChamberClick(`A${i}`)">
           A{{ i }}
         </button>
 
         <!-- Chamber buttons B -->
-        <button
-          v-for="i in 24"
-          :key="'B' + i"
-          class="chamber-btn"
-          :style="{
-            top: i <= 12 ? '42.5%' : '53.4%',
-            left: `${30 + ((i - 1) % 12) * (66 / 11)}%`,
-            transform: 'translate(-50%, -50%)'
-          }"
-          @click="handleChamberClick(`B${i}`)"
-        >
+        <button v-for="i in 24" :key="'B' + i" class="chamber-btn" :style="{
+          top: i <= 12 ? '42.5%' : '53.4%',
+          left: `${30 + ((i - 1) % 12) * (66 / 11)}%`,
+          transform: 'translate(-50%, -50%)'
+        }" @click="handleChamberClick(`B${i}`)">
           B{{ i }}
         </button>
 
         <!-- Additional chamber-like buttons -->
-        <button class="chamber-btn" style="top: 42.5%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C1')">C1</button>
-        <button class="chamber-btn" style="top: 53.4%; left: 4.5%; transform: translate(-50%, -50%);" @click="handleChamberClick('C2')">C2</button>
-        <button class="chamber-btn" style="top: 9.6%; left: 10.8%; transform: translate(-50%, -50%);" @click="handleChamberClick('P')">P</button>
+        <button class="chamber-btn" style="top: 42.5%; left: 4.5%; transform: translate(-50%, -50%);"
+          @click="handleChamberClick('C1')">C1</button>
+        <button class="chamber-btn" style="top: 53.4%; left: 4.5%; transform: translate(-50%, -50%);"
+          @click="handleChamberClick('C2')">C2</button>
+        <button class="chamber-btn" style="top: 9.6%; left: 10.8%; transform: translate(-50%, -50%);"
+          @click="handleChamberClick('P')">P</button>
       </div>
 
-        <!-- Log Section -->
+      <!-- Log Section -->
       <div class="log" style="top: 0%; left: 2.25%;">
         <div class="log-header">
           <span>Log</span>
           <button class="clear-log-btn" @click="confirmClearLog">Clear</button>
         </div>
         <div class="log-box" ref="logBox">
-          <div
-            v-for="(entry, index) in logs"
-            :key="index"
-            class="log-entry"
-            :class="entry.type"
-          >
+          <div v-for="(entry, index) in logs" :key="index" class="log-entry" :class="entry.type">
             {{ entry.message }}
           </div>
         </div>
       </div>
-      
+
     </div>
     <!-- Command and action panels -->
     <div class="panel-stack">
       <div class="next-action-panel">
         <div class="panel-header">Commands</div>
         <div class="btn-display">
-          <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;" @click="logCommand('STOP', false);sendCommand('STOP')">STOP</button>
-          <button class="panel-btn" style="background-color: #f9cb00; color: white;" @click="logCommand('RESET', false);sendCommand('RESET')">RESET</button>
-          <button class="panel-btn" style="background-color: #4cd000; color: white;" @click="logCommand('RESUME', false);sendCommand('RESUME')">RESUME</button>
-          <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN NEXT</button>
-          <button class="panel-btn" style="background-color: #004073; color: white;" @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
+          <button class="panel-btn" style="background-color: #ff0000; color: white; height: 5.5vw; font-size: 2.7vw;"
+            @click="logCommand('STOP', false); sendCommand('STOP')">STOP</button>
+          <button class="panel-btn" style="background-color: #f9cb00; color: white;"
+            @click="logCommand('RESET', false); sendCommand('RESET')">RESET</button>
+          <button class="panel-btn" style="background-color: #4cd000; color: white;"
+            @click="logCommand('RESUME', false); sendCommand('RESUME')">RESUME</button>
+          <button class="panel-btn" style="background-color: #004073; color: white;" @click="runNextAction">RUN
+            NEXT</button>
+          <button class="panel-btn" style="background-color: #004073; color: white;"
+            @click="sendCommand('REQUEST_POS', true)">LOG POS</button>
         </div>
       </div>
       <div class="next-action-panel">
@@ -79,10 +70,10 @@
           <button class="panel-btn" @click="clearNextAction">CLEAR</button>
         </div>
       </div>
-      
 
-      </div>
-    
+
+    </div>
+
   </div>
 </template>
 
@@ -100,7 +91,6 @@ if (storedLogs) {
     logs.value = []
   }
 }
-
 
 const logBox = ref(null)
 const maxLogEntries = 2000
@@ -138,7 +128,7 @@ async function runNextAction() {
 
   try {
     if (fromLocation === toLocation) {
-      await sendCommand(`${toLocation}_leave`, true);
+      await sendCommand(`${toLocation}_leave`);
       await sendCommand(`RESET`); 
     } else if (!toLocation) {
       await sendCommand(`${fromLocation}_pickup`, true);
@@ -158,28 +148,32 @@ async function runNextAction() {
 async function sendCommand(command, responseWanted = false) {
   console.log("Sending command:", command);
   const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
-
   if (responseWanted) {
-    const received = res.data.received;
+    console.log("Response from backend:", res)
+    log(res, 'info')
 
-    // ID to name mapping
-    const idNameMap = {
-      2: 'Z-motor',
-      1: 'Theta-motor',
-      0: 'R-motor'
-    };
+    if (responseWanted) {
+      const received = res.data.received;
 
-    // Extract and log id and response from each item
-    if (Array.isArray(received)) {
-      received.forEach((item, idx) => {
-        const { id, response } = item;
-        const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
-        console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
-        // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
-        log(`${motorName}: ${response}`, 'info');
-      });
-    } else {
-      console.warn("Expected an array but got:", received);
+      // ID to name mapping
+      const idNameMap = {
+        2: 'Z-motor',
+        1: 'Theta-motor',
+        0: 'R-motor'
+      };
+
+      // Extract and log id and response from each item
+      if (Array.isArray(received)) {
+        received.forEach((item, idx) => {
+          const { id, response } = item;
+          const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
+          console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
+          // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
+          log(`${motorName}: ${response}`, 'info');
+        });
+      } else {
+        console.warn("Expected an array but got:", received);
+      }
     }
   }
 }
@@ -190,16 +184,16 @@ async function sendCommand(command, responseWanted = false) {
 
 async function logCommand(command, sendCommand = true) {
   log(command, 'info')
-  if (sendCommand){
+  if (sendCommand) {
     try {
-        const res = await axios.post('http://localhost:3000/api/arduino/command', {
-          command: nextAction.value
-        });
-        console.log("Response from backend:", res)
+      const res = await axios.post('http://localhost:3000/api/arduino/command', {
+        command: nextAction.value
+      });
+      console.log("Response from backend:", res)
 
-      } catch (err) {
-        const msg = err.response?.data?.error || err.message || 'Unknown error';
-      }
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Unknown error';
+    }
   }
 }
 
@@ -248,10 +242,10 @@ watch(
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items:flex-start; 
-  justify-content: flex-start; 
+  align-items: flex-start;
+  justify-content: flex-start;
   margin: 0;
-  padding: 1em;  
+  padding: 1em;
 }
 
 .row-ui {
@@ -259,35 +253,35 @@ watch(
   height: 100%;
   display: flex;
   flex-direction: row;
-  align-items: flex-start; 
-  justify-content: flex-start; 
+  align-items: flex-start;
+  justify-content: flex-start;
   margin: 0;
   padding: 0;
 }
 
 .robot-svg {
   position: absolute;
-  top: 0; 
-  left: 0; 
-  width: 100%; 
-  height: auto; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
   object-fit: contain;
   pointer-events: none;
 }
 
 
 .svg-wrapper {
-  position: relative; 
+  position: relative;
   width: 100%;
-  aspect-ratio: 1.84 / 1; 
-  margin-top: 0; 
+  aspect-ratio: 1.84 / 1;
+  margin-top: 0;
 
 }
 
 .chamber-btn {
   position: absolute;
   z-index: 10;
-  font-size: 1.2vw; 
+  font-size: 1.2vw;
   width: 3vw;
   height: 2.7vw;
   background-color: #fbfbfb;
@@ -307,7 +301,7 @@ watch(
   color: rgb(255, 255, 255);
 }
 
-.commands{
+.commands {
   position: relative;
   background-color: #00731b;
   width: 3em;
@@ -336,10 +330,10 @@ watch(
   display: flex;
   padding-top: 7vw;
   flex-direction: column;
-  gap: 2vw; 
+  gap: 2vw;
   position: relative;
   top: 0%;
-  left: 2vw; 
+  left: 2vw;
 }
 
 
@@ -351,7 +345,7 @@ watch(
   height: 10%;
   font-family: Helvetica;
   text-align: center;
-  
+
 }
 
 .action-display {
@@ -399,7 +393,7 @@ watch(
   text-align: center;
 }
 
-.panel-btn:hover{
+.panel-btn:hover {
   background-color: #004073;
   transform: scale(1.05);
   color: rgb(255, 255, 255);
@@ -469,7 +463,7 @@ watch(
 
 .log-box::-webkit-scrollbar {
   width: 0.8em;
-  
+
 }
 
 .log-box::-webkit-scrollbar-track {
@@ -503,5 +497,4 @@ watch(
   background-color: white;
   color: #004073;
 }
-
 </style>
