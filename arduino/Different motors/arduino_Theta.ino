@@ -72,7 +72,7 @@ int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing sti
 
 
 //used for detecting loose cables
-int16_t locationNumberPreviousVarvInterrupt = locationNumber;
+int32_t locationNumberPreviousVarvInterrupt = locationNumber;
 int16_t numberOfSusVarvInterrupts = 0;
 int16_t currentTravelDirectionTracker = 0;
 int32_t timeLastDirectionSwap = counter;
@@ -171,7 +171,7 @@ void loop() {
 	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
-	  if(1000*derivative < 500){
+	  if(1000*derivative < 300){
 		if(abs(locationNumber - targetLocationNumber) < 2000){
 		  if(locationNumber > targetLocationNumber){
 			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.5*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
@@ -268,7 +268,7 @@ void loop() {
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -0.95;
+		speedNDir = -0.85;
 	  }
 	}
 
