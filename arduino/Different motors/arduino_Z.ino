@@ -73,6 +73,8 @@ float integral = 0;
 float PWMFraction = 0.0;
 int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
+int16_t lampBlinkCounter = 0;
+int16_t lampBlinkCurrentlyOn = true;
 
 
 //used for detecting loose cables
@@ -163,7 +165,12 @@ void loop() {
   }
 
 
-
+	lampBlinkCounter += 1;
+	if(lampBlinkCounter > 100){
+		lampBlinkCurrentlyOn = !lampBlinkCurrentlyOn;
+		if(lampBlinkCurrentlyOn) digitalWrite(13, HIGH);
+		if(!lampBlinkCurrentlyOn) digitalWrite(13, LOW);
+	}
 
 
 
