@@ -171,7 +171,7 @@ void loop() {
 	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
-	  if(1000*derivative < 500){
+	  if(1000*derivative < 300){
 		if(abs(locationNumber - targetLocationNumber) < 2000){
 		  if(locationNumber > targetLocationNumber){
 			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.5*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
@@ -268,7 +268,7 @@ void loop() {
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -0.95;
+		speedNDir = -0.85;
 	  }
 	}
 

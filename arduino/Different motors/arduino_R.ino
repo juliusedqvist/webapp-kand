@@ -284,7 +284,7 @@ void loop() {
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -0.8;
+		speedNDir = -0.65;
 	  }
 	}
 
