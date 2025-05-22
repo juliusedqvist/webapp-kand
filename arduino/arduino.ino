@@ -3,18 +3,18 @@
 
 
 
-#define DriveF 9
-#define DriveB 10
+#define DriveF 10
+#define DriveB 9
 #define Feedb1 2 //The motors channel B, I think. It is synchronius with channel Z
 #define Feedb2 5 //The motors channel A, I think
 #define FeedbVarv 3 //The motors channel Z
-#define FeedbHitEnd 4
+#define FeedbHitEnd A5
 
 
 
 
 #ifndef DEVICE_ID
-#define DEVICE_ID 0 // fallback ID
+#define DEVICE_ID 1 // fallback ID
 #endif
 
 
@@ -36,18 +36,14 @@ int16_t savedMissionIndex = 0;
 
 
 
-
-
-
 float delayTime = 20.0;
 
-
-volatile int32_t locationNumber = 0; //Goes from 0 to somewhere between 10k and 20k
+volatile int32_t locationNumber = 0; //Goes from 0 to like, 40-50k or smth
 int32_t prevLocationNumber = locationNumber;
-int32_t longagoPositionOne = locationNumber; //0 to 1.5s ago
-int32_t longagoPositionTwo = locationNumber; //1.5 to 3s ago
-int32_t longagoPositionThree = locationNumber; //3 to 4.5s ago
-int16_t loopsPerLongagoPositionUpdate = 1500/delayTime;
+int32_t longagoPositionOne = locationNumber; //0 to 2s ago
+int32_t longagoPositionTwo = locationNumber; //2 to 4s ago
+int32_t longagoPositionThree = locationNumber; //4 to 6s ago
+int16_t loopsPerLongagoPositionUpdate = 2000/delayTime;
 int32_t counter = 0;
 
 
@@ -58,16 +54,12 @@ int32_t targetLocationNumber = 0;
 
 
 
-
-
-
-
-float P = 0.002;//0.00035; //HUGE
-float I = 0;//.000000005;
-float D = 0.075;//0.07;
-float generalSpeedFactor = 0.45; //0.45
-int16_t forwardsMargin = 25;
-int16_t backwardsMargin = 5;
+float P = 0.001;//.0003
+float I = 0;//.0000000015.00000025;
+float D = 0.13;//0.115
+float generalSpeedFactor = 0.6; //0.8
+int16_t forwardsMargin = 10;
+int16_t backwardsMargin = 10;
 
 
 
@@ -76,7 +68,6 @@ float integral = 0;
 
 float PWMFraction = 0.0;
 int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
-
 
 
 
@@ -101,10 +92,12 @@ void setup() {
   pinMode(Feedb2, INPUT);
   pinMode(FeedbVarv, INPUT);
   pinMode(FeedbHitEnd, INPUT_PULLUP);
+  //pinMode(FeedbHitEnd, INPUT);
 
 
 
 
+  pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(13, OUTPUT); //Permanently high
@@ -158,6 +151,7 @@ void loop() {
       }
 
 
+
       incomingCommand = ""; // Reset buffer
     } else {
       incomingCommand += received;
@@ -168,25 +162,21 @@ void loop() {
 
 
 
-  float speedNDir = 0;
-  
-	if(missionIndex == 1){
 
+  float speedNDir = 0;
+	if(missionIndex == 1){
+  
 	  float e = targetLocationNumber - locationNumber;
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
-	  if(e > 0) speedNDir = 0.5;
-	  if(e < 0) speedNDir = -0.5;
-	  
-	  if(abs(e) < 1000 && antistuckCurrentPWMBonus != 0) speedNDir = antistuckCurrentPWMBonus;
-//	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
-	  if(1000*derivative < 250){
-		if(abs(locationNumber - targetLocationNumber) < 1000){
+	  if(1000*derivative < 300){
+		if(abs(locationNumber - targetLocationNumber) < 2000){
 		  if(locationNumber > targetLocationNumber){
-				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.45*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
-            } else{
-				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.45*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.5*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+		  } else{
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.5*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
 		  }
 		}
 	  }
@@ -208,14 +198,6 @@ void loop() {
 
 	  //If we are standing still and at the correct location:
 	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
-		missionIndex = 0;
-		savedMissionIndex = 0;
-		numberOfSusVarvInterrupts = 0;
-		Serial.println("done");
-	  }
-	 
-	  //If we are stuck against something but very close to target location, react quickly:
-	  if((abs(locationNumber - targetLocationNumber) < 300 && abs(locationNumber-longagoPositionTwo) < 80)){ //untested change 05-22: from 200, 50
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
@@ -247,14 +229,13 @@ void loop() {
 		  timeLastDirectionSwap = counter;
 		  currentTravelDirectionTracker = 0;
 		}
-		if(counter - timeLastDirectionSwap > 9000/delayTime){
+		if(counter - timeLastDirectionSwap > 11000/delayTime){
 			missionIndex = 0;
 			Serial.print("fuck : takesTooLong");
 			Serial.print(counter);
 			Serial.print("  ");
 			Serial.println(timeLastDirectionSwap);
 		}
-
 
 	 
 	  counter += 1;
@@ -270,8 +251,11 @@ void loop() {
 
 
 	} else if(missionIndex == 2){
-	  if(digitalRead(FeedbHitEnd) == LOW){
+	  if(analogRead(FeedbHitEnd) > 50){ //1023 is 5V
 		missionIndex = 0;
+		//targetLocationNumber = 5000;
+		
+		
 		savedMissionIndex = 0;
 		locationNumber = 0;
 		integral = 0;
@@ -284,12 +268,9 @@ void loop() {
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -0.65;
+		speedNDir = -0.85;
 	  }
 	}
-
- 
-
 
 
 
@@ -324,9 +305,9 @@ void loop() {
 
 void Feedb1INTERRUPT(){
   if(digitalRead(Feedb2) == HIGH){
-    locationNumber += 1;
-  } else{
     locationNumber -= 1;
+  } else{
+    locationNumber += 1;
   }
 }
 
