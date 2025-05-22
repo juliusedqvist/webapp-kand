@@ -209,7 +209,10 @@ void loop() {
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
-		Serial.println("fuck : veryStuck");
+		Serial.print("fuck : veryStuck");  //Can be caused by loose cables or misplaced samples
+		Serial.print(counter);
+		Serial.print("  ");
+		Serial.println(timeLastDirectionSwap);
 	  }
 
 
@@ -228,7 +231,10 @@ void loop() {
 		}
 		if(counter - timeLastDirectionSwap > 11000/delayTime){
 			missionIndex = 0;
-			Serial.println("fuck : takesTooLong");
+			Serial.print("fuck : takesTooLong");
+			Serial.print(counter);
+			Serial.print("  ");
+			Serial.println(timeLastDirectionSwap);
 		}
 
 	 
