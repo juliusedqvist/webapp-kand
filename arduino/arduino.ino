@@ -247,7 +247,7 @@ void loop() {
 		  timeLastDirectionSwap = counter;
 		  currentTravelDirectionTracker = 0;
 		}
-		if(timeLastDirectionSwap - counter > 16000/delayTime){
+		if(counter - timeLastDirectionSwap > 14000/delayTime){
 			missionIndex = 0;
 			Serial.println("fuck : takesTooLong");
 		}
