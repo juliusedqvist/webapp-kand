@@ -190,9 +190,9 @@ void loop() {
 	  if(1000*derivative < 250){
 		if(abs(locationNumber - targetLocationNumber) < 1000){
 		  if(locationNumber > targetLocationNumber){
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.15*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
-		  } else{
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.15*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.45*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+            } else{
+				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.45*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
 		  }
 		}
 	  }

@@ -26,7 +26,7 @@ String incomingCommand = "";
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int16_t missionIndex = 0;
+int16_t missionIndex = 2;
 
 //used for resume
 int16_t savedMissionIndex = 0;
@@ -270,6 +270,7 @@ void loop() {
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		numberOfSusVarvInterrupts = 0;
+		timeLastDirectionSwap = counter;
 		Serial.println("done");
         speedNDir = 0;
 

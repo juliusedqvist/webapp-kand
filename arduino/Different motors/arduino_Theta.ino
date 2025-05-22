@@ -54,7 +54,7 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.0004;//.0003
+float P = 0.001;//.0003
 float I = 0;//.0000000015.00000025;
 float D = 0.13;//0.115
 float generalSpeedFactor = 0.6; //0.8
@@ -176,12 +176,12 @@ void loop() {
 	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
-	  if(1000*derivative < 250){
+	  if(1000*derivative < 500){
 		if(abs(locationNumber - targetLocationNumber) < 2000){
 		  if(locationNumber > targetLocationNumber){
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.5*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
 		  } else{
-			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.5*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
 		  }
 		}
 	  }
@@ -210,12 +210,12 @@ void loop() {
 	  }
 	 
 	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-	  if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
+	  /*if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
 		Serial.println("fuck : veryStuck");
-	  }
+	  }*/
 
 
 
@@ -257,6 +257,7 @@ void loop() {
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		numberOfSusVarvInterrupts = 0;
+		timeLastDirectionSwap = counter;
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
