@@ -8,6 +8,7 @@ const position_reference = {
   A1_leave: [[20000, 1], [4000, 0], [30000, 2], ["RESET", 0]],
   B2_pickup: [[7150, 1], [39723, 0], [10000, 2]],
   B3_pickup: [[10000, 2]],
+  B4_pickup: [[10000, 1], [4000, 0], ["RESET", 0], ["RESET", 1]],
   RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
   RESUME: "RESUME",
@@ -46,8 +47,8 @@ router.post('/command', async (req, res) => {
     } else {
       throw new Error(`Invalid command format for key: ${command}`);
     }
-
     res.json({ status: 'success', sent: command, received: response });
+    console.log(res.json);
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Failed to send command', details: err.message });
