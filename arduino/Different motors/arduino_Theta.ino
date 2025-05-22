@@ -72,7 +72,7 @@ int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing sti
 
 
 //used for detecting loose cables
-int16_t locationNumberPreviousVarvInterrupt = locationNumber;
+int32_t locationNumberPreviousVarvInterrupt = locationNumber;
 int16_t numberOfSusVarvInterrupts = 0;
 int16_t currentTravelDirectionTracker = 0;
 int32_t timeLastDirectionSwap = counter;
