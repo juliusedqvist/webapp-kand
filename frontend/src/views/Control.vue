@@ -128,7 +128,7 @@ async function runNextAction() {
 
   try {
     if (fromLocation === toLocation) {
-      await sendCommand(`${toLocation}_leave`);
+      await sendCommand(`${toLocation}_leave`, true);
       await sendCommand(`RESET`); 
     } else if (!toLocation) {
       await sendCommand(`${fromLocation}_pickup`, true);
