@@ -34,6 +34,9 @@ router.post('/command', async (req, res) => {
       for (const cmd of commands) {
         console.log(cmd);
         const resData = await sendToArduino(cmd[1], cmd[0]);
+        if (resData.includes("fuck")) {
+          break;
+        }
         responses.push({ id: cmd[1], command: cmd[0], response: resData });
       }
       response = responses;
