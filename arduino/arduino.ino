@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <inttypes.h>
 
 
 
@@ -26,10 +26,10 @@ String incomingCommand = "";
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
-int missionIndex = 0;
+int16_t missionIndex = 2;
 
 //used for resume
-int savedMissionIndex = 0;
+int16_t savedMissionIndex = 0;
 
 
 
@@ -39,16 +39,16 @@ int savedMissionIndex = 0;
 float delayTime = 20.0;
 
 
-volatile long locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
-long prevLocationNumber = locationNumber;
-long longagoPositionOne = locationNumber; //0 to 2s ago
-long longagoPositionTwo = locationNumber; //2 to 4s ago
-long longagoPositionThree = locationNumber; //4 to 6s ago
-int loopsPerLongagoPositionUpdate = 2000/delayTime;
-int counter = 0;
+volatile int32_t locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
+int32_t prevLocationNumber = locationNumber;
+int32_t longagoPositionOne = locationNumber; //0 to 2s ago
+int32_t longagoPositionTwo = locationNumber; //2 to 4s ago
+int32_t longagoPositionThree = locationNumber; //4 to 6s ago
+int16_t loopsPerLongagoPositionUpdate = 2000/delayTime;
+int32_t counter = 0;
 
 
-long targetLocationNumber = 0;
+int32_t targetLocationNumber = 0;
 
 
 
@@ -63,21 +63,23 @@ float P = 0.0003;
 float I = 0.000000005;//.00000025;
 float D = 0;//.085;
 float generalSpeedFactor = 0.85;
-int forwardsMargin = 225; //1mm
-int backwardsMargin = 225;
+int16_t forwardsMargin = 225; //1mm
+int16_t backwardsMargin = 225;
 
 
 float antistuckCurrentPWMBonus = 0;
 float integral = 0;
 
 float PWMFraction = 0.0;
-int movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
+int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
 
 
 //used for detecting loose cables
-int locationNumberPreviousVarvInterrupt = locationNumber;
-int numberOfSusVarvInterrupts = 0;
+int16_t locationNumberPreviousVarvInterrupt = locationNumber;
+int16_t numberOfSusVarvInterrupts = 0;
+int16_t currentTravelDirectionTracker = 0;
+int16_t timeLastDirectionSwap = counter;
 
 
 
@@ -141,13 +143,15 @@ void loop() {
 		Serial.println("stopped");
       } else if(incomingCommand.equalsIgnoreCase("RESUME")){
         missionIndex = savedMissionIndex;
+		timeLastDirectionSwap = counter;
       } else if(incomingCommand.equalsIgnoreCase("REQUEST_POS")){
         Serial.print("Current position: ");
         Serial.println(locationNumber);
       } else {
         missionIndex = 1;
 		savedMissionIndex = 1;
-        targetLocationNumber = atoi(incomingCommand.c_str());
+        targetLocationNumber = atol(incomingCommand.c_str());
+		timeLastDirectionSwap = counter;
       }
 
 
@@ -222,18 +226,31 @@ void loop() {
       }
   */   
       //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-      if((antistuckCurrentPWMBonus > 0.8 && abs(locationNumber-longagoPositionThree) < 1000)){
-        missionIndex = 0;
+      /*if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
+		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
-		Serial.println("fuck");
-        //GRAB
-        //REPORT BACK THAT AN UNCERTAIN GRAB WAS PERFORMED
-        //REPORT THAT IT IS LIKELY THAT DRIFT HAS OCCURED
-      }
+		Serial.println("fuck : veryStuck");
+      }*/
 
 
 
+		if(speedNDir < 0 && currentTravelDirectionTracker != -1){
+		  timeLastDirectionSwap = counter;
+		  currentTravelDirectionTracker = -1;
+		}
+		if(speedNDir > 0 && currentTravelDirectionTracker != 1){
+		  timeLastDirectionSwap = counter;
+		  currentTravelDirectionTracker = 1;
+		}
+		if(speedNDir == 0 && currentTravelDirectionTracker != 0){
+		  timeLastDirectionSwap = counter;
+		  currentTravelDirectionTracker = 0;
+		}
+		if(timeLastDirectionSwap - counter > 16000/delayTime){
+			missionIndex = 0;
+			Serial.println("fuck : takesTooLong");
+		}
 
      
       if(prevLocationNumber != locationNumber){
@@ -253,6 +270,7 @@ void loop() {
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
 		numberOfSusVarvInterrupts = 0;
+		timeLastDirectionSwap = counter;
 		Serial.println("done");
         speedNDir = 0;
 
@@ -314,7 +332,7 @@ void FeedbVarvINTERRUPT(){
 		numberOfSusVarvInterrupts += 1;
 		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
 			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
-			Serial.println("fuck :VarvInterruptSpam");
+			Serial.println("fuck : varvInterruptSpam");
 			missionIndex = 0;
 		}
 	}
