@@ -260,7 +260,7 @@ void loop() {
 
 
     } else if(missionIndex == 2){
-      if(false){//analogRead(FeedbHitEnd) > 150){
+      if(analogRead(FeedbHitEnd) > 150){
         missionIndex = 0;
 		savedMissionIndex = 0;
         locationNumber = 0;
