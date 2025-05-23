@@ -9,18 +9,21 @@
 #define Feedb2 5 //The motors channel A, I think
 #define FeedbVarv 3 //The motors channel Z
 #define FeedbHitEnd A5
-#define lockPin 8
 
 
 
 
 #ifndef DEVICE_ID
-#define DEVICE_ID 2 // fallback ID
+#define DEVICE_ID 1 // fallback ID
 #endif
+
+
 
 
 char buffer[64];
 String incomingCommand = "";
+
+
 
 
 //0: Stand still
@@ -33,13 +36,9 @@ int16_t savedMissionIndex = 0;
 
 
 
-
-
-
 float delayTime = 20.0;
 
-
-volatile int32_t locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
+volatile int32_t locationNumber = 0; //Goes from 0 to like, 40-50k or smth
 int32_t prevLocationNumber = locationNumber;
 int32_t longagoPositionOne = locationNumber; //0 to 2s ago
 int32_t longagoPositionTwo = locationNumber; //2 to 4s ago
@@ -55,16 +54,13 @@ int32_t targetLocationNumber = 0;
 
 
 
+float P = 0.0012;//.0003
+float I = 0;//.0000000015.00000025;
+float D = 0.13;//0.115
+float generalSpeedFactor = 0.6; //0.8
+int16_t forwardsMargin = 10;
+int16_t backwardsMargin = 10;
 
-
-
-
-float P = 0.0003;
-float I = 0.000000005;//.00000025;
-float D = 0;//.085;
-float generalSpeedFactor = 0.85;
-int16_t forwardsMargin = 225; //1mm
-int16_t backwardsMargin = 225;
 
 
 float antistuckCurrentPWMBonus = 0;
@@ -73,6 +69,8 @@ float integral = 0;
 float PWMFraction = 0.0;
 int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
+int16_t lampBlinkCounter = 0;
+int16_t lampBlinkCurrentlyOn = true;
 
 
 //used for detecting loose cables
@@ -95,8 +93,8 @@ void setup() {
   pinMode(Feedb1, INPUT);
   pinMode(Feedb2, INPUT);
   pinMode(FeedbVarv, INPUT);
-  pinMode(FeedbHitEnd, INPUT);
-  pinMode(lockPin, OUTPUT);
+  pinMode(FeedbHitEnd, INPUT_PULLUP);
+  //pinMode(FeedbHitEnd, INPUT);
 
 
 
@@ -167,65 +165,67 @@ void loop() {
 
 
 
-	float speedNDir = 0;
-	if(missionIndex == 0){
-		digitalWrite(lockPin, LOW); //Turn the lock ON
-	} else if(missionIndex == 1){
-		digitalWrite(lockPin, HIGH); //Turn the lock OFF
-      float e = targetLocationNumber - locationNumber;
-      float derivative = (locationNumber - prevLocationNumber)/delayTime;
-      speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
-   
-   
-      if(1000*derivative < 250){
-		//  Serial.println("Antistuck action");
-        if(abs(locationNumber - targetLocationNumber) < 6000){
-          if(locationNumber > targetLocationNumber){
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.2*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
-          } else{
-            antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.2*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
-          }
-        }
-      }
-      if(abs(locationNumber - targetLocationNumber) > 8000){
-        antistuckCurrentPWMBonus = 0;
-      }
-     
-	 
-	  //If we pass the goal, we're done. Turn the lock on asap and then declare that we're done.
-      if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
-        missionIndex = 0;
-		speedNDir = 0;
-		savedMissionIndex = 0;
-		numberOfSusVarvInterrupts = 0;
-		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
-		Serial.println("done");
-      }
-      if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
-        missionIndex = 0;
-		speedNDir = 0;
-		savedMissionIndex = 0;
-		numberOfSusVarvInterrupts = 0;
-		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
-		Serial.println("done");
-      }
+	lampBlinkCounter += 1;
+	if((lampBlinkCounter > 25 && missionIndex == 1) || lampBlinkCounter > 10000){
+		lampBlinkCurrentlyOn = !lampBlinkCurrentlyOn;
+		if(lampBlinkCurrentlyOn) digitalWrite(13, HIGH);
+		if(!lampBlinkCurrentlyOn) digitalWrite(13, LOW);
+    lampBlinkCounter = 0;
+	}
 
-/*
-      //If we are standing still and at the correct location:
-      if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
-        missionIndex = 0;
-		savedMissionIndex = 0;
-		digitalWrite(lockPin, LOW); //Turn the lock ON ASAP
-		Serial.println("done");
-      }
-  */   
-      //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
-      /*if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
+
+  
+  float speedNDir = 0;
+	if(missionIndex == 1){
+  
+	  float e = targetLocationNumber - locationNumber;
+	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
+	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+
+
+	  if(1000*derivative < 500){
+		if(abs(locationNumber - targetLocationNumber) < 2000){
+		  if(locationNumber > targetLocationNumber){
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.5*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+		  } else{
+			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.5*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+		  }
+		}
+	  }
+	  if(abs(locationNumber - targetLocationNumber) > 2000){
+		antistuckCurrentPWMBonus = 0;
+	  }
+	 
+	  if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
+		speedNDir = 0;
+		integral = 0;
+		antistuckCurrentPWMBonus = 0;
+	  }
+	  if(locationNumber < targetLocationNumber + forwardsMargin && speedNDir < 0){
+		speedNDir = 0;
+		integral = 0;
+		antistuckCurrentPWMBonus = 0;
+	  }
+
+
+	  //If we are standing still and at the correct location:
+	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
-		Serial.println("fuck : veryStuck");
-      }*/
+		Serial.println("done");
+	  }
+	 
+	  //If we are stuck against something and not close to the target location, react slowly. Max allowed location diff is high to account for that the programs believed position often drifts when the robot is pushing against something it cant move.
+	  if(counter - timeLastDirectionSwap > 5000/delayTime && abs(locationNumber-longagoPositionThree) < 500){
+		missionIndex = 0;
+		savedMissionIndex = 0;
+		numberOfSusVarvInterrupts = 0;
+		Serial.print("fuck : veryStuck");  //Can be caused by loose cables or misplaced samples
+		Serial.print(counter);
+		Serial.print("  ");
+		Serial.println(timeLastDirectionSwap);
+	  }
 
 
 
@@ -241,31 +241,37 @@ void loop() {
 		  timeLastDirectionSwap = counter;
 		  currentTravelDirectionTracker = 0;
 		}
-		if(counter - timeLastDirectionSwap > 14000/delayTime){
+		if(counter - timeLastDirectionSwap > 11000/delayTime){
 			missionIndex = 0;
-			Serial.println("fuck : takesTooLong");
+			Serial.print("fuck : takesTooLong");
+			Serial.print(counter);
+			Serial.print("  ");
+			Serial.println(timeLastDirectionSwap);
 		}
 
-     
+	 
 	  counter += 1;
 	  if(counter % loopsPerLongagoPositionUpdate == 0){
 		longagoPositionThree = longagoPositionTwo;
 		longagoPositionTwo = longagoPositionOne;
 		longagoPositionOne = locationNumber;
 	  }
-      if(prevLocationNumber != locationNumber){
-        integral = integral + e*delayTime;
-      }
-      prevLocationNumber = locationNumber;
+	  if(prevLocationNumber != locationNumber){
+		integral = integral + e*delayTime;
+	  }
+	  prevLocationNumber = locationNumber;
 
 
-    } else if(missionIndex == 2){
-      if(analogRead(FeedbHitEnd) > 150){
-        missionIndex = 0;
+	} else if(missionIndex == 2){
+	  if(analogRead(FeedbHitEnd) > 50){ //1023 is 5V
+		missionIndex = 0;
+		//targetLocationNumber = 5000;
+		
+		
 		savedMissionIndex = 0;
-        locationNumber = 0;
-        integral = 0;
-        antistuckCurrentPWMBonus = 0;
+		locationNumber = 0;
+		integral = 0;
+		antistuckCurrentPWMBonus = 0;
 		longagoPositionThree = 0;
 		longagoPositionTwo = 0;
 		longagoPositionOne = 0;
@@ -273,18 +279,10 @@ void loop() {
 		timeLastDirectionSwap = counter;
 		Serial.println("done");
         speedNDir = 0;
-
-		digitalWrite(lockPin, LOW); //Turn the lock ON
-      } else{
-
-		digitalWrite(lockPin, HIGH); //Turn the lock OFF
-        speedNDir = -0.4;
-      }
-    }
-
-
- 
-
+	  } else{
+		speedNDir = -0.85;
+	  }
+	}
 
 
 

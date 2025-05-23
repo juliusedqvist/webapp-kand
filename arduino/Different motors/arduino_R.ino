@@ -62,10 +62,10 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.002;//0.00035; //HUGE
+float P = 0.0015;//0.00035; //HUGE
 float I = 0;//.000000005;
-float D = 0.075;//0.07;
-float generalSpeedFactor = 0.45; //0.45
+float D = 0.07;//0.07;
+float generalSpeedFactor = 0.25; //0.45
 int16_t forwardsMargin = 25;
 int16_t backwardsMargin = 5;
 
@@ -76,6 +76,9 @@ float integral = 0;
 
 float PWMFraction = 0.0;
 int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
+
+int16_t lampBlinkCounter = 0;
+int16_t lampBlinkCurrentlyOn = true;
 
 
 
@@ -168,17 +171,27 @@ void loop() {
 
 
 
+	lampBlinkCounter += 1;
+	if((lampBlinkCounter > 25 && missionIndex == 1) || lampBlinkCounter > 10000){
+		lampBlinkCurrentlyOn = !lampBlinkCurrentlyOn;
+		if(lampBlinkCurrentlyOn) digitalWrite(13, HIGH);
+		if(!lampBlinkCurrentlyOn) digitalWrite(13, LOW);
+    lampBlinkCounter = 0;
+	}
+
+
+
   float speedNDir = 0;
   
 	if(missionIndex == 1){
 
 	  float e = targetLocationNumber - locationNumber;
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
-	  if(e > 0) speedNDir = 0.5;
-	  if(e < 0) speedNDir = -0.5;
+	//  if(e > 0) speedNDir = 0.5;
+	  //if(e < 0) speedNDir = -0.5;
 	  
-	  if(abs(e) < 1000 && antistuckCurrentPWMBonus != 0) speedNDir = antistuckCurrentPWMBonus;
-//	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
+//	  if(abs(e) < 1000 && antistuckCurrentPWMBonus != 0) speedNDir = antistuckCurrentPWMBonus;
+	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
 	  if(1000*derivative < 250){
@@ -215,7 +228,7 @@ void loop() {
 	  }
 	 
 	  //If we are stuck against something but very close to target location, react quickly:
-	  if((abs(locationNumber - targetLocationNumber) < 300 && abs(locationNumber-longagoPositionTwo) < 80)){ //untested change 05-22: from 200, 50
+	  if((abs(locationNumber - targetLocationNumber) < 300 && antistuckCurrentPWMBonus > 0.8)){ //untested change 05-22: from 200, 50
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
@@ -284,7 +297,7 @@ void loop() {
 		Serial.println("done");
         speedNDir = 0;
 	  } else{
-		speedNDir = -0.65;
+		speedNDir = -1;
 	  }
 	}
 
