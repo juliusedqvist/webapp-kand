@@ -54,7 +54,7 @@ int32_t targetLocationNumber = 0;
 
 
 
-float P = 0.001;//.0003
+float P = 0.0012;//.0003
 float I = 0;//.0000000015.00000025;
 float D = 0.13;//0.115
 float generalSpeedFactor = 0.6; //0.8
@@ -69,6 +69,8 @@ float integral = 0;
 float PWMFraction = 0.0;
 int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
+int16_t lampBlinkCounter = 0;
+int16_t lampBlinkCurrentlyOn = true;
 
 
 //used for detecting loose cables
@@ -163,6 +165,16 @@ void loop() {
 
 
 
+	lampBlinkCounter += 1;
+	if((lampBlinkCounter > 25 && missionIndex == 1) || lampBlinkCounter > 10000){
+		lampBlinkCurrentlyOn = !lampBlinkCurrentlyOn;
+		if(lampBlinkCurrentlyOn) digitalWrite(13, HIGH);
+		if(!lampBlinkCurrentlyOn) digitalWrite(13, LOW);
+    lampBlinkCounter = 0;
+	}
+
+
+  
   float speedNDir = 0;
 	if(missionIndex == 1){
   
@@ -171,7 +183,7 @@ void loop() {
 	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
-	  if(1000*derivative < 300){
+	  if(1000*derivative < 500){
 		if(abs(locationNumber - targetLocationNumber) < 2000){
 		  if(locationNumber > targetLocationNumber){
 			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.5*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
