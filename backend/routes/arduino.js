@@ -9,7 +9,7 @@ function sleep(ms) {
 
 const position_reference = {
   B1_pickup: [[7220, 1], [47000, 2], [3804, 0], [70000, 2], ["RESET", 0], ["RESET", 1], ["RESET", 0], ["RESET", 1]],
-  A1_leave: [[7220, 1], [70000, 2], [2540, 0], [47000, 2]],
+  A1_leave: [[7220, 1], [70000, 2], [2520, 0], [47000, 2]],
   B2_pickup: [[7150, 1], [39723, 0], [10000, 2]],
   B3_pickup: [[10000, 2]],
   B4_pickup: [[10000, 1], [4000, 0], ["RESET", 0], ["RESET", 1]],
@@ -38,7 +38,7 @@ router.post('/command', async (req, res) => {
       for (const cmd of commands) {
         console.log(cmd);
         const resData = await sendToArduino(cmd[1], cmd[0]);
-        sleep(500)
+        sleep(500);
         responses.push({ id: cmd[1], command: cmd[0], response: resData });
         if (resData.includes("fuck")) {
           break;
