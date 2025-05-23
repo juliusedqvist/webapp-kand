@@ -3,6 +3,10 @@ const express = require('express');
 const router = express.Router();
 const { sendBroadcastCommand, sendToArduino } = require('../services/arduinoController');
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const position_reference = {
   B1_pickup: [[7220, 1], [47000, 2], [3804, 0], [70000, 2], ["RESET", 0], ["RESET", 1], ["RESET", 0], ["RESET", 1]],
   A1_leave: [[7220, 1], [70000, 2], [2540, 0], [47000, 2]],
@@ -34,6 +38,7 @@ router.post('/command', async (req, res) => {
       for (const cmd of commands) {
         console.log(cmd);
         const resData = await sendToArduino(cmd[1], cmd[0]);
+        sleep(500)
         responses.push({ id: cmd[1], command: cmd[0], response: resData });
         if (resData.includes("fuck")) {
           break;
