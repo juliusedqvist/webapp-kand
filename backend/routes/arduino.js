@@ -9,7 +9,7 @@ const position_reference = {
   B2_pickup: [[7150, 1], [39723, 0], [10000, 2]],
   B3_pickup: [[10000, 2]],
   B4_pickup: [[10000, 1], [4000, 0], ["RESET", 0], ["RESET", 1]],
-  RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2]],
+  RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2], ["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
   RESUME: "RESUME",
   // REQUEST_POS: [["REQUEST_POS", 0], ["REQUEST_POS", 1], ["REQUEST_POS", 2]]
