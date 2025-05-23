@@ -58,8 +58,8 @@ float P = 0.0012;//.0003
 float I = 0;//.0000000015.00000025;
 float D = 0.13;//0.115
 float generalSpeedFactor = 0.6; //0.8
-int16_t forwardsMargin = 15;
-int16_t backwardsMargin = 15;
+int16_t forwardsMargin = 30; //ca 0.2 degrees
+int16_t backwardsMargin = 30;
 
 
 
