@@ -5,7 +5,7 @@ const { sendBroadcastCommand, sendToArduino } = require('../services/arduinoCont
 
 const position_reference = {
   B1_pickup: [[7220, 1], [47000, 2], [3804, 0], [70000, 2], ["RESET", 0], ["RESET", 1], ["RESET", 0], ["RESET", 1]],
-  A1_leave: [[7220, 1], [70000, 2], [2550, 0], [47000, 2]],
+  A1_leave: [[7220, 1], [70000, 2], [2510, 0], [47000, 2]],
   B2_pickup: [[7150, 1], [39723, 0], [10000, 2]],
   B3_pickup: [[10000, 2]],
   B4_pickup: [[10000, 1], [4000, 0], ["RESET", 0], ["RESET", 1]],
