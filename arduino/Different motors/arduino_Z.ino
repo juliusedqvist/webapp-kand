@@ -231,7 +231,7 @@ void loop() {
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
-		Serial.println("error : veryStuck");
+		Serial.println("error : veryStuck");  //Can be caused by loose cables or misplaced samples
       }*/
 
 
