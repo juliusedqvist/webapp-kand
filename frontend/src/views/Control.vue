@@ -150,7 +150,7 @@ async function sendCommand(command, responseWanted = false) {
   const res = await axios.post('http://localhost:3000/api/arduino/command', { command });
   if (responseWanted) {
     console.log("Response from backend:", res)
-    log(res, 'info')
+    //log(res, 'info')
 
     if (responseWanted) {
       const received = res.data.received;
@@ -168,8 +168,12 @@ async function sendCommand(command, responseWanted = false) {
           const { id, response } = item;
           const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
           console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
-          // log(`Response from: ${motorName} (id=${id}), response=${response}`, 'info');
+          if (response.includes("error")){
+            log(`${motorName}: ${response}`, 'error');
+          }
+          else {
           log(`${motorName}: ${response}`, 'info');
+          }
         });
       } else {
         console.warn("Expected an array but got:", received);
