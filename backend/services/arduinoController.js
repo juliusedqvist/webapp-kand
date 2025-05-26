@@ -113,8 +113,8 @@ function sendToArduino(id, command) {
     const onData = (data) => {
       const trimmed = data.trim().toLowerCase();
       console.log(`Response from Arduino ID ${id}: ${trimmed}`);
-
-      if (trimmed === 'done' || trimmed.includes('fuck')) {
+      
+      if (trimmed === 'done' || trimmed.includes('error')) {
         parser.off('data', onData);
         resolve(trimmed);
       }
