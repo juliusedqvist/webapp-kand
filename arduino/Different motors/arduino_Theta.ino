@@ -221,7 +221,7 @@ void loop() {
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
-		Serial.print("fuck : veryStuck");  //Can be caused by loose cables or misplaced samples
+		Serial.print("Error : veryStuck");  //Can be caused by loose cables or misplaced samples
 		Serial.print(counter);
 		Serial.print("  ");
 		Serial.println(timeLastDirectionSwap);
@@ -243,7 +243,7 @@ void loop() {
 		}
 		if(counter - timeLastDirectionSwap > 11000/delayTime){
 			missionIndex = 0;
-			Serial.print("fuck : takesTooLong");
+			Serial.print("Error : takesTooLong");
 			Serial.print(counter);
 			Serial.print("  ");
 			Serial.println(timeLastDirectionSwap);
@@ -330,7 +330,7 @@ void FeedbVarvINTERRUPT(){
 		numberOfSusVarvInterrupts += 1;
 		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
 			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
-			Serial.println("fuck : varvInterruptSpam");
+			Serial.println("Error : varvInterruptSpam");
 			missionIndex = 0;
 		}
 	}
