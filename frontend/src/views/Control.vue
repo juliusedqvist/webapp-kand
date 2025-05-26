@@ -423,7 +423,7 @@ watch(
   color: white;
   background-color: #004073;
   font-weight: bold;
-  padding: 0.25em 0.8em;
+  padding: 0.25vw 0.8em;
   font-size: 1.1em;
   flex-shrink: 0;
 }
