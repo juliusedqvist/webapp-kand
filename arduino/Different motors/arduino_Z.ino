@@ -231,7 +231,7 @@ void loop() {
 		missionIndex = 0;
 		savedMissionIndex = 0;
 		numberOfSusVarvInterrupts = 0;
-		Serial.println("Error : veryStuck");
+		Serial.println("error : veryStuck");
       }*/
 
 
@@ -250,7 +250,7 @@ void loop() {
 		}
 		if(counter - timeLastDirectionSwap > 14000/delayTime){
 			missionIndex = 0;
-			Serial.println("Error : takesTooLong");
+			Serial.println("error : takesTooLong");
 		}
 
      
@@ -339,7 +339,7 @@ void FeedbVarvINTERRUPT(){
 		numberOfSusVarvInterrupts += 1;
 		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
 			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
-			Serial.println("Error : varvInterruptSpam");
+			Serial.println("error : varvInterruptSpam");
 			missionIndex = 0;
 		}
 	}
