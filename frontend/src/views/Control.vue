@@ -168,7 +168,7 @@ async function sendCommand(command, responseWanted = false) {
           const { id, response } = item;
           const motorName = idNameMap[id] || id;  // fallback to raw id if unknown
           console.log(`Item ${idx}: ${motorName} (id=${id}), response=${response}`);
-          if (response.includes("Error")){
+          if (response.includes("error")){
             log(`${motorName}: ${response}`, 'error');
           }
           else {

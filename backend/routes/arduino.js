@@ -40,7 +40,7 @@ router.post('/command', async (req, res) => {
         const resData = await sendToArduino(cmd[1], cmd[0]);
         sleep(500);
         responses.push({ id: cmd[1], command: cmd[0], response: resData });
-        if (resData.includes("Error")) {
+        if (resData.includes("error")) {
           break;
         }
       }
