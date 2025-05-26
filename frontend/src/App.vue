@@ -6,7 +6,6 @@
     <nav>
       <router-link to="/">Home</router-link>
       <router-link to="/control">Control-center</router-link>
-      <router-link to="/controlold">Control-center (old)</router-link>
       <router-link to="/docs">Documentation</router-link>
     </nav>
     <main>
