@@ -81,6 +81,7 @@
 import { ref, watch, nextTick } from 'vue'
 import axios from 'axios';
 
+
 const logs = ref([])
 const storedLogs = localStorage.getItem('logs')
 if (storedLogs) {
@@ -92,12 +93,14 @@ if (storedLogs) {
   }
 }
 
+
 const logBox = ref(null)
 const maxLogEntries = 2000
 
 
 const nextAction = ref(null)
 const selectedChambers = ref([])
+
 
 function handleChamberClick(label) {
   if (selectedChambers.value.length === 0) {
@@ -109,10 +112,12 @@ function handleChamberClick(label) {
   }
 }
 
+
 function clearNextAction() {
   nextAction.value = null
   selectedChambers.value = []
 }
+
 
 async function runNextAction() {
   const tempActionValue = nextAction.value;
@@ -143,6 +148,7 @@ async function runNextAction() {
     console.error("Command error:", msg);
   }
 }
+
 
 // Reusable helper for sending commands
 async function sendCommand(command, responseWanted = false) {
@@ -183,9 +189,6 @@ async function sendCommand(command, responseWanted = false) {
 }
 
 
-
-
-
 async function logCommand(command, sendCommand = true) {
   log(command, 'info')
   if (sendCommand) {
@@ -200,6 +203,7 @@ async function logCommand(command, sendCommand = true) {
     }
   }
 }
+
 
 function log(message, type = 'info') {
   const now = new Date()
@@ -451,14 +455,6 @@ watch(
 
 .log-entry.info {
   color: #004073;
-}
-
-.log-entry.warning {
-  color: #b8860b;
-}
-
-.log-entry.response {
-  color: #068f11;
 }
 
 .log-entry.error {
