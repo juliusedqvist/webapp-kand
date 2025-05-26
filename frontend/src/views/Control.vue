@@ -71,7 +71,6 @@
         </div>
       </div>
 
-
     </div>
 
   </div>
@@ -80,7 +79,6 @@
 <script setup>
 import { ref, watch, nextTick } from 'vue'
 import axios from 'axios';
-
 
 const logs = ref([])
 const storedLogs = localStorage.getItem('logs')
@@ -93,14 +91,11 @@ if (storedLogs) {
   }
 }
 
-
 const logBox = ref(null)
 const maxLogEntries = 2000
 
-
 const nextAction = ref(null)
 const selectedChambers = ref([])
-
 
 function handleChamberClick(label) {
   if (selectedChambers.value.length === 0) {
@@ -112,12 +107,10 @@ function handleChamberClick(label) {
   }
 }
 
-
 function clearNextAction() {
   nextAction.value = null
   selectedChambers.value = []
 }
-
 
 async function runNextAction() {
   const tempActionValue = nextAction.value;
@@ -148,7 +141,6 @@ async function runNextAction() {
     console.error("Command error:", msg);
   }
 }
-
 
 // Reusable helper for sending commands
 async function sendCommand(command, responseWanted = false) {
@@ -188,7 +180,6 @@ async function sendCommand(command, responseWanted = false) {
   }
 }
 
-
 async function logCommand(command, sendCommand = true) {
   log(command, 'info')
   if (sendCommand) {
@@ -203,7 +194,6 @@ async function logCommand(command, sendCommand = true) {
     }
   }
 }
-
 
 function log(message, type = 'info') {
   const now = new Date()
@@ -221,14 +211,12 @@ function log(message, type = 'info') {
   console.log(`[${type.toUpperCase()}] ${message}`)
 }
 
-
 function confirmClearLog() {
   if (confirm("Are you sure you want to clear the log?")) {
     logs.value = []
     localStorage.removeItem('logs')
   }
 }
-
 
 watch(
   logs,
@@ -241,8 +229,6 @@ watch(
   { deep: true }
 )
 </script>
-
-
 
 <style scoped>
 .column-ui {
@@ -343,7 +329,6 @@ watch(
   top: 0%;
   left: 2vw;
 }
-
 
 .panel-header {
   font-size: 1.6vw;
@@ -447,7 +432,6 @@ watch(
   display: none;
 }
 
-
 .log-entry {
   font-weight: 500;
   margin-bottom: 0.3em;
@@ -463,7 +447,6 @@ watch(
 
 .log-box::-webkit-scrollbar {
   width: 0.8em;
-
 }
 
 .log-box::-webkit-scrollbar-track {
