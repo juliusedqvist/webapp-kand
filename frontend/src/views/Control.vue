@@ -462,7 +462,7 @@ watch(
 }
 
 .log-entry.error {
-  color: #b00020;
+  color: #820118;
 }
 
 .log-box::-webkit-scrollbar {
