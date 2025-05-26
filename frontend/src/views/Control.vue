@@ -423,7 +423,7 @@ watch(
   color: white;
   background-color: #004073;
   font-weight: bold;
-  padding: 0.1em 0.8em;
+  padding: 0.25em 0.8em;
   font-size: 1.1em;
   flex-shrink: 0;
 }
@@ -434,7 +434,7 @@ watch(
   padding: 0.5em;
   border-left: 0.25vw solid #004073;
   border-right: 0.25vw solid #004073;
-  border-bottom: 0.25vw solid #004073;
+  border-bottom: 0.25vw solid #004073; 
   border-bottom-right-radius: 0.5em;
   border-bottom-left-radius: 0.5em;
 }
