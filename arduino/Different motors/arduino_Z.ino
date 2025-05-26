@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <inttypes.h>
 
-
-
 #define DriveF 10
 #define DriveB 9
 #define Feedb1 2 //The motors channel B, I think. It is synchronius with channel Z
@@ -11,17 +9,12 @@
 #define FeedbHitEnd A5
 #define lockPin 8
 
-
-
-
 #ifndef DEVICE_ID
 #define DEVICE_ID 2 // fallback ID
 #endif
 
-
 char buffer[64];
 String incomingCommand = "";
-
 
 //0: Stand still
 //1: Move to targetLocationNumber
@@ -31,13 +24,7 @@ int16_t missionIndex = 0;
 //used for resume
 int16_t savedMissionIndex = 0;
 
-
-
-
-
-
 float delayTime = 20.0;
-
 
 volatile int32_t locationNumber = 0; //Goes from 0 to something HUGE (>100k? >50k?)
 int32_t prevLocationNumber = locationNumber;
@@ -47,17 +34,7 @@ int32_t longagoPositionThree = locationNumber; //4 to 6s ago
 int16_t loopsPerLongagoPositionUpdate = 2000/delayTime;
 int32_t counter = 0;
 
-
 int32_t targetLocationNumber = 0;
-
-
-
-
-
-
-
-
-
 
 float P = 0.003; //.0003
 float I = 0.000000005;//.00000025;
@@ -65,7 +42,6 @@ float D = 0;//.085;
 float generalSpeedFactor = 0.85;
 int16_t forwardsMargin = 225; //1mm
 int16_t backwardsMargin = 225;
-
 
 float antistuckCurrentPWMBonus = 0;
 float integral = 0;
@@ -76,20 +52,15 @@ int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing sti
 int16_t lampBlinkCounter = 0;
 int16_t lampBlinkCurrentlyOn = true;
 
-
 //used for detecting loose cables
 int32_t locationNumberPreviousVarvInterrupt = locationNumber;
 int16_t numberOfSusVarvInterrupts = 0;
 int16_t currentTravelDirectionTracker = 0;
 int32_t timeLastDirectionSwap = counter;
 
-
-
-
 // put function declarations here:
 void Feedb1INTERRUPT();
 void FeedbVarvINTERRUPT();
-
 
 void setup() {
   pinMode(DriveF, OUTPUT);
@@ -100,21 +71,14 @@ void setup() {
   pinMode(FeedbHitEnd, INPUT);
   pinMode(lockPin, OUTPUT);
 
-
-
-
   pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(13, OUTPUT); //Permanently high
   digitalWrite(13, HIGH);
 
-
   attachInterrupt(digitalPinToInterrupt(Feedb1), Feedb1INTERRUPT, RISING);
   attachInterrupt(digitalPinToInterrupt(FeedbVarv), FeedbVarvINTERRUPT, RISING);
-
-
-
 
   Serial.begin(9600);
   while (!Serial); // Wait for serial port to connect (for some boards)
@@ -122,20 +86,13 @@ void setup() {
   Serial.println(buffer);
 }
 
-
-
-
-
-
 void loop() {
   while (Serial.available() > 0) {
     char received = Serial.read();
 
-
     // If newline, process command
     if (received == '\n') {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
-
 
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
@@ -156,14 +113,11 @@ void loop() {
 		timeLastDirectionSwap = counter;
       }
 
-
-
       incomingCommand = ""; // Reset buffer
     } else {
       incomingCommand += received;
     }
   }
-
 
 	lampBlinkCounter += 1;
 	if(lampBlinkCounter > 100){
@@ -171,8 +125,6 @@ void loop() {
 		if(lampBlinkCurrentlyOn) digitalWrite(13, HIGH);
 		if(!lampBlinkCurrentlyOn) digitalWrite(13, LOW);
 	}
-
-
 
 	float speedNDir = 0;
 	if(missionIndex == 0){
@@ -182,8 +134,7 @@ void loop() {
       float e = targetLocationNumber - locationNumber;
       float derivative = (locationNumber - prevLocationNumber)/delayTime;
       speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
-   
-   
+
       if(1000*derivative < 250){
 		//  Serial.println("Antistuck action");
         if(abs(locationNumber - targetLocationNumber) < 6000){
@@ -197,7 +148,6 @@ void loop() {
       if(abs(locationNumber - targetLocationNumber) > 8000){
         antistuckCurrentPWMBonus = 0;
       }
-     
 	 
 	  //If we pass the goal, we're done. Turn the lock on asap and then declare that we're done.
       if(locationNumber > targetLocationNumber - backwardsMargin && speedNDir > 0){
@@ -234,8 +184,6 @@ void loop() {
 		Serial.println("error : veryStuck");  //Can be caused by loose cables or misplaced samples
       }*/
 
-
-
 		if(speedNDir < 0 && currentTravelDirectionTracker != -1){
 		  timeLastDirectionSwap = counter;
 		  currentTravelDirectionTracker = -1;
@@ -252,8 +200,7 @@ void loop() {
 			missionIndex = 0;
 			Serial.println("error : takesTooLong");
 		}
-
-     
+		
 	  counter += 1;
 	  if(counter % loopsPerLongagoPositionUpdate == 0){
 		longagoPositionThree = longagoPositionTwo;
@@ -264,7 +211,6 @@ void loop() {
         integral = integral + e*delayTime;
       }
       prevLocationNumber = locationNumber;
-
 
     } else if(missionIndex == 2){
       if(analogRead(FeedbHitEnd) > 150){
@@ -289,18 +235,11 @@ void loop() {
       }
     }
 
-
- 
-
-
-
-
   PWMFraction = abs(speedNDir);
   if(PWMFraction > 1) PWMFraction = 1;
   movementDir = 0;
   if(speedNDir > 0.0) movementDir = 1;
   if(speedNDir < 0.0) movementDir = -1;
-
 
   if(movementDir == 1){
     analogWrite(DriveF, 255); //Driving and braking simultaneously was reccomended by the data sheet when controlling it via PWM
@@ -317,13 +256,6 @@ void loop() {
   }
 }
 
-
-
-
-
-
-
-
 void Feedb1INTERRUPT(){
   if(digitalRead(Feedb2) == HIGH){
     locationNumber -= 1;
@@ -331,7 +263,6 @@ void Feedb1INTERRUPT(){
     locationNumber += 1;
   }
 }
-
 
 void FeedbVarvINTERRUPT(){
 	locationNumber = round(locationNumber/1000.0)*1000.0;
