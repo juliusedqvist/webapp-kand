@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <inttypes.h>
 
+
+
 #define DriveF 10
 #define DriveB 9
 #define Feedb1 2 //The motors channel B, I think. It is synchronius with channel Z
@@ -9,21 +11,24 @@
 #define FeedbHitEnd A5
 #define lampBlink 13
 
+
+
+
 #ifndef DEVICE_ID
 #define DEVICE_ID 1 // fallback ID
 #endif
 
+
+
+
 char buffer[64];
 String incomingCommand = "";
 
-<<<<<<< HEAD
 float delayTime = 20.0;
 
 
 
 
-=======
->>>>>>> 4afaf8dd9d1c55748d9807e8c33216323d6a7d6a
 //0: Stand still
 //1: Move to targetLocationNumber
 //2: Reset
@@ -33,7 +38,6 @@ int32_t targetLocationNumber = 0;
 //used for resume
 int16_t savedMissionIndex = 0;
 
-<<<<<<< HEAD
 
 
 
@@ -59,9 +63,6 @@ float integral = 0;
 float PWMFraction = 0.0;
 int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
 
-=======
-float delayTime = 20.0;
->>>>>>> 4afaf8dd9d1c55748d9807e8c33216323d6a7d6a
 
 volatile int32_t locationNumber = 0; //Goes from 0 to like, 40-50k or smth
 int32_t prevLocationNumber = locationNumber;
@@ -70,27 +71,11 @@ int32_t longagoPositionTwo = locationNumber; //2 to 4s ago
 int32_t longagoPositionThree = locationNumber; //4 to 6s ago
 int32_t counter = 0;
 
-<<<<<<< HEAD
 
-=======
-int32_t targetLocationNumber = 0;
-
-float P = 0.0012;//.0003
-float I = 0;//.0000000015.00000025;
-float D = 0.13;//0.115
-float generalSpeedFactor = 0.6; //0.8
-int16_t forwardsMargin = 30; //ca 0.2 degrees
-int16_t backwardsMargin = 30;
-
-float antistuckCurrentPWMBonus = 0;
-float integral = 0;
-
-float PWMFraction = 0.0;
-int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
->>>>>>> 4afaf8dd9d1c55748d9807e8c33216323d6a7d6a
 
 int16_t lampBlinkCounter = 0;
 int16_t lampBlinkCurrentlyOn = true;
+
 
 //used for detecting loose cables
 int32_t locationNumberPreviousVarvInterrupt = locationNumber;
@@ -98,9 +83,13 @@ int16_t numberOfSusVarvInterrupts = 0;
 int16_t currentTravelDirectionTracker = 0;
 int32_t timeLastDirectionSwap = counter;
 
+
+
+
 // put function declarations here:
 void Feedb1INTERRUPT();
 void FeedbVarvINTERRUPT();
+
 
 void setup() {
   pinMode(DriveF, OUTPUT);
@@ -111,14 +100,21 @@ void setup() {
   pinMode(FeedbHitEnd, INPUT_PULLUP);
   //pinMode(FeedbHitEnd, INPUT);
 
+
+
+
   pinMode(4, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(lampBlink, OUTPUT); //Permanently high
   digitalWrite(lampBlink, HIGH);
 
+
   attachInterrupt(digitalPinToInterrupt(Feedb1), Feedb1INTERRUPT, RISING);
   attachInterrupt(digitalPinToInterrupt(FeedbVarv), FeedbVarvINTERRUPT, RISING);
+
+
+
 
   Serial.begin(9600);
   while (!Serial); // Wait for serial port to connect (for some boards)
@@ -126,13 +122,20 @@ void setup() {
   Serial.println(buffer);
 }
 
+
+
+
+
+
 void loop() {
   while (Serial.available() > 0) {
     char received = Serial.read();
 
+
     // If newline, process command
     if (received == '\n') {
       incomingCommand.trim(); // Remove any extra whitespace/newlines
+
 
       if(incomingCommand.equalsIgnoreCase("RESET")){
         missionIndex = 2;
@@ -153,11 +156,18 @@ void loop() {
 		timeLastDirectionSwap = counter;
       }
 
+
+
       incomingCommand = ""; // Reset buffer
     } else {
       incomingCommand += received;
     }
   }
+
+
+
+
+
 
 	lampBlinkCounter += 1;
 	if((lampBlinkCounter > 25 && missionIndex == 1) || lampBlinkCounter > 10000){
@@ -167,6 +177,8 @@ void loop() {
     lampBlinkCounter = 0;
 	}
 
+
+  
   float speedNDir = 0;
 	if(missionIndex == 1){
   
@@ -174,14 +186,9 @@ void loop() {
 	  float derivative = (locationNumber - prevLocationNumber)/delayTime;
 	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
-<<<<<<< HEAD
 
 	  if(1000*derivative < antistuckMaxSpeed){
 		if(abs(locationNumber - targetLocationNumber) < antistuckMaxDist){
-=======
-	  if(1000*derivative < 500){
-		if(abs(locationNumber - targetLocationNumber) < 2000){
->>>>>>> 4afaf8dd9d1c55748d9807e8c33216323d6a7d6a
 		  if(locationNumber > targetLocationNumber){
 			antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - antistuckGrowthRate*delayTime/1000;//0.5
 		  } else{
@@ -204,6 +211,7 @@ void loop() {
 		antistuckCurrentPWMBonus = 0;
 	  }
 
+
 	  //If we are standing still and at the correct location:
 	  if((locationNumber > targetLocationNumber - backwardsMargin && locationNumber < targetLocationNumber + forwardsMargin && locationNumber == prevLocationNumber)){
 		missionIndex = 0;
@@ -219,6 +227,8 @@ void loop() {
 		numberOfSusVarvInterrupts = 0;
 		Serial.println("error : veryStuck");  //Can be caused by loose cables or misplaced samples
 	  }
+
+
 
 		if(speedNDir < 0 && currentTravelDirectionTracker != -1){
 		  timeLastDirectionSwap = counter;
@@ -239,7 +249,8 @@ void loop() {
 			Serial.print("  ");
 			Serial.println(timeLastDirectionSwap);
 		}
-		
+
+	 
 	  counter += 1;
 	  if(counter % loopsPerLongagoPositionUpdate == 0){
 		longagoPositionThree = longagoPositionTwo;
@@ -251,11 +262,13 @@ void loop() {
 	  }
 	  prevLocationNumber = locationNumber;
 
+
 	} else if(missionIndex == 2){
 	  if(analogRead(FeedbHitEnd) > 50){ //1023 is 5V
 		missionIndex = 0;
 		//targetLocationNumber = 5000;
-	
+		
+		
 		savedMissionIndex = 0;
 		locationNumber = 0;
 		integral = 0;
@@ -272,11 +285,14 @@ void loop() {
 	  }
 	}
 
+
+
   PWMFraction = abs(speedNDir);
   if(PWMFraction > 1) PWMFraction = 1;
   movementDir = 0;
   if(speedNDir > 0.0) movementDir = 1;
   if(speedNDir < 0.0) movementDir = -1;
+
 
   if(movementDir == 1){
     analogWrite(DriveF, 255); //Driving and braking simultaneously was reccomended by the data sheet when controlling it via PWM
@@ -293,6 +309,13 @@ void loop() {
   }
 }
 
+
+
+
+
+
+
+
 void Feedb1INTERRUPT(){
   if(digitalRead(Feedb2) == HIGH){
     locationNumber -= 1;
@@ -300,6 +323,7 @@ void Feedb1INTERRUPT(){
     locationNumber += 1;
   }
 }
+
 
 void FeedbVarvINTERRUPT(){
 	locationNumber = round(locationNumber/1000.0)*1000.0;
