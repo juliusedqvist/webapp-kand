@@ -9,6 +9,7 @@
 #define Feedb2 5 //The motors channel A, I think
 #define FeedbVarv 3 //The motors channel Z
 #define FeedbHitEnd 4
+#define lampBlink 13
 
 
 
@@ -23,6 +24,7 @@
 char buffer[64];
 String incomingCommand = "";
 
+float delayTime = 20.0;
 
 
 
@@ -30,6 +32,7 @@ String incomingCommand = "";
 //1: Move to targetLocationNumber
 //2: Reset
 int16_t missionIndex = 0;
+int32_t targetLocationNumber = 0;
 
 //used for resume
 int16_t savedMissionIndex = 0;
@@ -39,19 +42,6 @@ int16_t savedMissionIndex = 0;
 
 
 
-float delayTime = 20.0;
-
-
-volatile int32_t locationNumber = 0; //Goes from 0 to somewhere between 10k and 20k
-int32_t prevLocationNumber = locationNumber;
-int32_t longagoPositionOne = locationNumber; //0 to 1.5s ago
-int32_t longagoPositionTwo = locationNumber; //1.5 to 3s ago
-int32_t longagoPositionThree = locationNumber; //3 to 4.5s ago
-int16_t loopsPerLongagoPositionUpdate = 1500/delayTime;
-int32_t counter = 0;
-
-
-int32_t targetLocationNumber = 0;
 
 
 
@@ -65,17 +55,32 @@ int32_t targetLocationNumber = 0;
 float P = 0.0015;//0.00035; //HUGE
 float I = 0;//.000000005;
 float D = 0.07;//0.07;
+float antistuckGrowthRate = 0.45;
+float antistuckMaxSpeed = 250; //the speed which, when the motor is above it, the antistuckCurrentPWMBonus does not increase
+float antistuckMaxDist = 1000; //the distance which, when the motor is further away from the target location, the antistuckCurrentPWMBonus is always 0.
 float generalSpeedFactor = 0.25; //0.45
-int16_t forwardsMargin = 25;
-int16_t backwardsMargin = 5;
+int16_t forwardsMargin = 25; //less than 0.9 mm
+int16_t backwardsMargin = 5; //more than 0.2mm
+int16_t loopsPerLongagoPositionUpdate = 1500/delayTime;
 
 
 
 float antistuckCurrentPWMBonus = 0;
 float integral = 0;
-
 float PWMFraction = 0.0;
 int16_t movementDir = 0; //-1 for backwards, +1 for forwards, 0 for standing still
+
+
+
+
+
+volatile int32_t locationNumber = 0; //Goes from 0 to somewhere between 10k and 20k
+int32_t prevLocationNumber = locationNumber;
+int32_t longagoPositionOne = locationNumber; //0 to 1.5s ago
+int32_t longagoPositionTwo = locationNumber; //1.5 to 3s ago
+int32_t longagoPositionThree = locationNumber; //3 to 4.5s ago
+int32_t counter = 0;
+
 
 int16_t lampBlinkCounter = 0;
 int16_t lampBlinkCurrentlyOn = true;
@@ -110,8 +115,8 @@ void setup() {
 
   pinMode(6, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
   pinMode(7, INPUT); //Just for safety - voltages will be applied to these, but will not be used.
-  pinMode(13, OUTPUT); //Permanently high
-  digitalWrite(13, HIGH);
+  pinMode(lampBlink, OUTPUT); //Permanently high
+  digitalWrite(lampBlink, HIGH);
 
 
   attachInterrupt(digitalPinToInterrupt(Feedb1), Feedb1INTERRUPT, RISING);
@@ -174,8 +179,8 @@ void loop() {
 	lampBlinkCounter += 1;
 	if((lampBlinkCounter > 25 && missionIndex == 1) || lampBlinkCounter > 10000){
 		lampBlinkCurrentlyOn = !lampBlinkCurrentlyOn;
-		if(lampBlinkCurrentlyOn) digitalWrite(13, HIGH);
-		if(!lampBlinkCurrentlyOn) digitalWrite(13, LOW);
+		if(lampBlinkCurrentlyOn) digitalWrite(lampBlink, HIGH);
+		if(!lampBlinkCurrentlyOn) digitalWrite(lampBlink, LOW);
     lampBlinkCounter = 0;
 	}
 
@@ -194,16 +199,16 @@ void loop() {
 	  speedNDir = I*integral + P*e + D*derivative + antistuckCurrentPWMBonus;
 
 
-	  if(1000*derivative < 250){
-		if(abs(locationNumber - targetLocationNumber) < 1000){
+	  if(1000*derivative < antistuckMaxSpeed){
+		if(abs(locationNumber - targetLocationNumber) < antistuckMaxDist){
 		  if(locationNumber > targetLocationNumber){
-				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - 0.45*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
+				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus - antistuckGrowthRate*delayTime/1000;// * (1+antistuckCurrentPWMBonus);
             } else{
-				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + 0.45*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
+				antistuckCurrentPWMBonus = antistuckCurrentPWMBonus + antistuckGrowthRate*delayTime/1000;// * (1-antistuckCurrentPWMBonus);
 		  }
 		}
 	  }
-	  if(abs(locationNumber - targetLocationNumber) > 2000){
+	  if(abs(locationNumber - targetLocationNumber) > antistuckMaxDist){
 		antistuckCurrentPWMBonus = 0;
 	  }
 	 
@@ -345,8 +350,8 @@ void FeedbVarvINTERRUPT(){
 	locationNumber = round(locationNumber/1000.0)*1000.0;
 	if(locationNumber - locationNumberPreviousVarvInterrupt < 200){
 		numberOfSusVarvInterrupts += 1;
-		if(numberOfSusVarvInterrupts > 100 && missionIndex == 1){
-			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
+		if(numberOfSusVarvInterrupts > 100 && numberOfSusVarvInterrupts < 110 && missionIndex == 1){
+//			detachInterrupt(digitalPinToInterrupt(FeedbVarv));
 			Serial.println("error : varvInterruptSpam");
 			missionIndex = 0;
 		}
