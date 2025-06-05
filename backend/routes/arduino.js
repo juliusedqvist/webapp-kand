@@ -6,7 +6,7 @@ const { sendBroadcastCommand, sendToArduino } = require('../services/arduinoCont
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
+// 0: r, 1: theta, 2: z
 const position_reference = {
   B1_pickup: [[7220, 1], [51000, 2], [3855, 0], [74000, 2], ["RESET", 0], ["RESET", 1], ["RESET", 0], ["RESET", 1]],
   B1_leave: [[7220, 1], [74000, 2], [3855, 0], [51000, 2]],
@@ -15,6 +15,9 @@ const position_reference = {
   B2_pickup: [[7150, 1], [39723, 0], [10000, 2]],
   B3_pickup: [[10000, 2]],
   B4_pickup: [[10000, 1], [4000, 0], ["RESET", 0], ["RESET", 1]],
+  A24_pickup: [["RESET", 2], [40000, 2]],
+  A23_pickup: [["RESET", 1], [4000, 1]],
+  A22_pickup: [["RESET", 0], [500, 0]],
   RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2], ["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
   RESUME: "RESUME",
