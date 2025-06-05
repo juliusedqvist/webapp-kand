@@ -71,7 +71,6 @@
         </div>
       </div>
 
-
     </div>
 
   </div>
@@ -94,7 +93,6 @@ if (storedLogs) {
 
 const logBox = ref(null)
 const maxLogEntries = 2000
-
 
 const nextAction = ref(null)
 const selectedChambers = ref([])
@@ -132,7 +130,6 @@ async function runNextAction() {
       await sendCommand(`RESET`); 
     } else if (!toLocation) {
       await sendCommand(`${fromLocation}_pickup`, true);
-      // await sendCommand(`RESET`);
     } else {
       await sendCommand(`${fromLocation}_pickup`, true);
       await sendCommand(`${toLocation}_leave`, true);
@@ -182,10 +179,6 @@ async function sendCommand(command, responseWanted = false) {
   }
 }
 
-
-
-
-
 async function logCommand(command, sendCommand = true) {
   log(command, 'info')
   if (sendCommand) {
@@ -217,14 +210,12 @@ function log(message, type = 'info') {
   console.log(`[${type.toUpperCase()}] ${message}`)
 }
 
-
 function confirmClearLog() {
   if (confirm("Are you sure you want to clear the log?")) {
     logs.value = []
     localStorage.removeItem('logs')
   }
 }
-
 
 watch(
   logs,
@@ -237,8 +228,6 @@ watch(
   { deep: true }
 )
 </script>
-
-
 
 <style scoped>
 .column-ui {
@@ -340,7 +329,6 @@ watch(
   left: 2vw;
 }
 
-
 .panel-header {
   font-size: 1.6vw;
   margin-bottom: -0.4em;
@@ -423,7 +411,7 @@ watch(
   color: white;
   background-color: #004073;
   font-weight: bold;
-  padding: 0.1em 0.8em;
+  padding: 0.25vw 0.8em;
   font-size: 1.1em;
   flex-shrink: 0;
 }
@@ -434,7 +422,7 @@ watch(
   padding: 0.5em;
   border-left: 0.25vw solid #004073;
   border-right: 0.25vw solid #004073;
-  border-bottom: 0.25vw solid #004073;
+  border-bottom: 0.25vw solid #004073; 
   border-bottom-right-radius: 0.5em;
   border-bottom-left-radius: 0.5em;
 }
@@ -442,7 +430,6 @@ watch(
 .log-box::-webkit-scrollbar:horizontal {
   display: none;
 }
-
 
 .log-entry {
   font-weight: 500;
@@ -453,21 +440,12 @@ watch(
   color: #004073;
 }
 
-.log-entry.warning {
-  color: #b8860b;
-}
-
-.log-entry.response {
-  color: #068f11;
-}
-
 .log-entry.error {
-  color: #b00020;
+  color: #c40000;
 }
 
 .log-box::-webkit-scrollbar {
   width: 0.8em;
-
 }
 
 .log-box::-webkit-scrollbar-track {

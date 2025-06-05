@@ -1,7 +1,6 @@
 <template>
   <div>
-    <h1>Välkommen till Webappen</h1>
-    <p>Detta är startsidan.</p>
+    <h1>Welcome to J.E.F.A Robotcontrol</h1>
   </div>
 </template>
 
@@ -10,7 +9,8 @@
 
 <style scoped>
 h1 {
-  color: #42b983;
+  margin-top: 30vh;
+  color: #004073;
 }
 </style>
 

@@ -5,7 +5,7 @@
   <div id="app">
     <nav>
       <router-link to="/">Home</router-link>
-      <router-link to="/control">Control-center</router-link>
+      <router-link to="/control">Control center</router-link>
       <router-link to="/docs">Documentation</router-link>
     </nav>
     <main>
@@ -44,7 +44,9 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: flex-start; /* Align to top of the main */
-  align-items: flex-start; /* Align to the left of the main */
+  /*align-items: flex-start; /* Align to the left of the main */
+  align-items: center;
   overflow: hidden; /* ensures no scroll in content */
+  
 }
 </style>
