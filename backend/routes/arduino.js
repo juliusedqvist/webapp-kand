@@ -16,6 +16,8 @@ const position_reference = {
   B3_pickup: [[10000, 2]],
   B4_pickup: [[10000, 1], [4000, 0], ["RESET", 0], ["RESET", 1]],
   A24_pickup: [["RESET", 2], [40000, 2]],
+  A23_pickup: [["RESET", 1], [4000, 1]],
+  A22_pickup: [["RESET", 0], [500, 0]],
   RESET: [["RESET", 0], ["RESET", 1], ["RESET", 2], ["RESET", 0], ["RESET", 1], ["RESET", 2]],
   STOP: "STOP",
   RESUME: "RESUME",
